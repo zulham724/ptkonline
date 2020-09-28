@@ -14,12 +14,17 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    //return view('welcome');
+    return redirect('dashboard');
 });
 
 Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
-    return Inertia\Inertia::render('Test',['test'=>'jancok']);
+    return Inertia\Inertia::render('Test',['title'=>'Selamat Datang di Dashboard Penelitian Tindakan Kelas Guru PAI']);
 })->name('dashboard');
+
+// Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
+//     return Inertia\Inertia::render('Test',['test'=>'jancok']);
+// })->name('dashboard');
 
 Route::get('/test', function(){
     return \App\Models\ClassroomResearch::all();
