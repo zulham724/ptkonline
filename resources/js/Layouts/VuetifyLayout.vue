@@ -3,7 +3,7 @@
     <v-navigation-drawer v-model="drawer" app>
         <v-list dense>
             <v-list-item-group v-model="item" color="primary">
-                <v-list-item active link>
+                <v-list-item active link @click="goToUrl('/')">
                     <v-list-item-action>
                         <v-icon>mdi-home</v-icon>
                     </v-list-item-action>
@@ -20,7 +20,7 @@
                         </v-list-item-content>
                     </template>
 
-                    <v-list-item link>
+                    <v-list-item link @click="goToUrl('/pretests')">
                         <v-list-item-content>
                             <v-list-item-title>Pre Tes</v-list-item-title>
                         </v-list-item-content>
@@ -106,7 +106,29 @@ export default {
             drawer: null,
             item: 0
         }
-    } //console.log({!!$auth!!})
+    },
+    // watch: {
+    //     item: function (newVal, oldVal) {
+    //         alert(newVal)
+    //     }
+    // },
     //console.log(JSON.parse(window.localStorage.getItem('auth')))
+    mounted() {
+        //alert('as')
+    },
+    methods: {
+        goToUrl(url) {
+            this.$inertia.visit(url, {
+                method: 'get',
+                data: {},
+                replace: false,
+                preserveState: false,
+                preserveScroll: false,
+                only: [],
+                headers: {},
+            })
+        }
+    }
+
 }
 </script>

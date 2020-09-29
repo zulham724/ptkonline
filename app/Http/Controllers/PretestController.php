@@ -14,7 +14,8 @@ class PretestController extends Controller
      */
     public function index()
     {
-        //
+        //return Pretest::withCount('question_lists')->get();
+        return \Inertia\Inertia::render('Pretest/Index',['items'=>Pretest::withCount('question_lists')->get()]);
     }
 
     /**
@@ -35,7 +36,7 @@ class PretestController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        return $request;
     }
 
     /**
@@ -46,7 +47,11 @@ class PretestController extends Controller
      */
     public function show(Pretest $pretest)
     {
-        //
+        $pretest->load(['question_lists.question_list_type','question_lists.answer_lists'=>function($query){
+            $query->select('answer_lists.id','answer_lists.value','answer_lists.question_list_id');
+        }]);
+        return \Inertia\Inertia::render('Pretest/Show',['data'=>$pretest]);
+
     }
 
     /**

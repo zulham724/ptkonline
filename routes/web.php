@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\PretestController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -18,16 +18,28 @@ Route::get('/', function () {
     return redirect('dashboard');
 });
 
-Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
-    return Inertia\Inertia::render('Test',['title'=>'Selamat Datang di Dashboard Penelitian Tindakan Kelas Guru PAI']);
-})->name('dashboard');
+// Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
+//     return Inertia\Inertia::render('Home',['title'=>'Selamat Datang di Dashboard Penelitian Tindakan Kelas Guru','image_path'=>asset('storage/images/')]);
+// })->name('dashboard');
+
+// Route::middleware(['auth:sanctum', 'verified'])->get('/pretest', 'PretestController@index')->name('pretest.index');
+
+Route::middleware(['auth:sanctum', 'verified'])->group(function(){
+    Route::get('/dashboard', function () {
+        return Inertia\Inertia::render('Home',['title'=>'Selamat Datang di Dashboard Penelitian Tindakan Kelas Guru','image_path'=>asset('storage/images/')]);
+    })->name('dashboard');
+
+    Route::resource('pretests', PretestController::class);
+
+});
+
 
 // Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
 //     return Inertia\Inertia::render('Test',['test'=>'jancok']);
 // })->name('dashboard');
 
 Route::get('/test', function(){
-    return \App\Models\ClassroomResearch::all();
+    return asset('storage/images/');
 });
 
 Route::group(['prefix' => 'admin'], function () {
