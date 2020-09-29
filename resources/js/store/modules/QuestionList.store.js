@@ -1,7 +1,5 @@
 const state = {
-    data:{
-        question_lists:[]
-    }
+    question_lists:[]
 }
 // Getter functions
 const getters = {
@@ -24,11 +22,21 @@ const actions = {
 }
 // Mutations
 const mutations = {
-    setAnswer( state, payload ) {
-        state.data={...payload.data, question_lists:[...payload.data.question_lists]}
-     },
+    // setAnswer( state, payload ) {
+    //     state.data={...payload.data, question_lists:[...payload.data.question_lists]}
+    //  },
      set( state, payload ) {
-        // state.data={...payload.data, question_lists:[...payload.data.question_lists]}
+       
+        state.question_lists = [];
+        payload.question_lists.forEach(v => {
+            let item={}
+            item.id=v.id;
+            item.answer=v.answer;
+            //console.log('> '+v.answer)
+            state.question_lists.push(item)
+        });
+        console.log(state.question_lists)
+
      },
     
 }

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PretestController;
+use App\Http\Controllers\PosttestController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -30,6 +31,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function(){
     })->name('dashboard');
 
     Route::resource('pretests', PretestController::class);
+    Route::resource('posttests', PosttestController::class);
 
 });
 

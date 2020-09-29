@@ -14,7 +14,7 @@ class PosttestController extends Controller
      */
     public function index()
     {
-        //
+        return \Inertia\Inertia::render('Posttest/Index',['items'=>Posttest::withCount('question_lists')->get()]);
     }
 
     /**
@@ -46,7 +46,15 @@ class PosttestController extends Controller
      */
     public function show(Posttest $posttest)
     {
-        //
+        $posttest->load(['question_lists.question_list_type','question_lists.answer_lists'=>function($query){
+            $query->select('answer_lists.id','answer_lists.value','answer_lists.question_list_id');
+        }]);
+        $posttest->question_lists->transform(function($item, $key){
+            $item->answer=null;
+            return $item;
+        });
+        //return $pretest;
+        return \Inertia\Inertia::render('Pretest/Show',['data'=>$posttest]);
     }
 
     /**

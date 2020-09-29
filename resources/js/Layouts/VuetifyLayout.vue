@@ -38,7 +38,7 @@
                         </v-list-item-content>
                     </v-list-item>
 
-                    <v-list-item>
+                    <v-list-item link @click="goToUrl('/posttests')">
                         <v-list-item-content>
                             <v-list-item-title>Post Tes</v-list-item-title>
                         </v-list-item-content>

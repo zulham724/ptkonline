@@ -50,6 +50,11 @@ class PretestController extends Controller
         $pretest->load(['question_lists.question_list_type','question_lists.answer_lists'=>function($query){
             $query->select('answer_lists.id','answer_lists.value','answer_lists.question_list_id');
         }]);
+        $pretest->question_lists->transform(function($item, $key){
+            $item->answer=null;
+            return $item;
+        });
+        //return $pretest;
         return \Inertia\Inertia::render('Pretest/Show',['data'=>$pretest]);
 
     }
