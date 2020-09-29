@@ -25,10 +25,10 @@ const actions = {
 // Mutations
 const mutations = {
     setAnswer( state, payload ) {
-        //state.data={...payload.data, question_lists:[...payload.data.question_lists.map()]}
+        state.data={...payload.data, question_lists:[...payload.data.question_lists]}
      },
      set( state, payload ) {
-        return state.varaible1;
+        // state.data={...payload.data, question_lists:[...payload.data.question_lists]}
      },
     
 }

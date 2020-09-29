@@ -14,7 +14,7 @@
         <v-card-text>
             <v-row align="center">
                 <v-col cols="12">
-                    <v-img :src="image_path+'/alur.PNG'" alt="Sunny image"></v-img>
+                    <v-img src="images/alur.PNG" alt="Sunny image"></v-img>
                 </v-col>
             </v-row>
         </v-card-text>
@@ -40,7 +40,7 @@
         <v-card-text>
             <v-row align="center">
                 <v-col cols="12">
-                    <v-img :src="image_path+'/skenario_pelatihan.PNG'" size=92></v-img>
+                    <v-img src="images/skenario_pelatihan.PNG" size=92></v-img>
                 </v-col>
             </v-row>
         </v-card-text>
