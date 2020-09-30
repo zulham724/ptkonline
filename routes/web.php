@@ -3,8 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PretestController;
 use App\Http\Controllers\PosttestController;
-use App\Http\Controllers\ClassRoomResearchController;
-use App\Http\Controllers\ClassRoomResearchFormatController;
+use App\Http\Controllers\ClassroomResearchController;
+use App\Http\Controllers\ClassroomResearchFormatController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -34,8 +34,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function(){
 
     Route::resource('pretests', PretestController::class);
     Route::resource('posttests', PosttestController::class);
-    Route::resource('classroom_researches', ClassRoomResearchController::class);
-    Route::get('educational_level/{id}/classroom_research_format',[ClassRoomResearchFormatController::class,'getByEducatioanlLevel']);
+    Route::resource('classroom_researches', ClassroomResearchController::class);
+    Route::get('educational_level/{id}/classroom_research_format',[ClassroomResearchFormatController::class,'getByEducatioanlLevel']);
 
 });
 
