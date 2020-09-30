@@ -32,11 +32,28 @@
                         </v-list-item-content>
                     </v-list-item>
 
-                    <v-list-item>
-                        <v-list-item-content>
-                            <v-list-item-title>Praktik</v-list-item-title>
-                        </v-list-item-content>
-                    </v-list-item>
+                    <v-list-group :value="true" no-action sub-group>
+                        <template v-slot:activator>
+                            <v-list-item-content>
+                                <v-list-item-title>Praktik</v-list-item-title>
+                            </v-list-item-content>
+                        </template>
+
+                        <v-list-item link @click="goToUrl('/classroom_researches')">
+                            <v-list-item-title>List PTK</v-list-item-title>
+
+                            <v-list-item-icon>
+                                <v-icon>mdi-file-outline</v-icon>
+                            </v-list-item-icon>
+                        </v-list-item>
+                        <v-list-item link @click="goToUrl('/classroom_researches/create')">
+                            <v-list-item-title>Buat PTK</v-list-item-title>
+
+                            <v-list-item-icon>
+                                <v-icon>mdi-file-outline</v-icon>
+                            </v-list-item-icon>
+                        </v-list-item>
+                    </v-list-group>
 
                     <v-list-item link @click="goToUrl('/posttests')">
                         <v-list-item-content>
@@ -46,8 +63,26 @@
 
                 </v-list-group>
 
+                <v-list-item active link @click="goToUrl('/consultations')">
+                    <v-list-item-action>
+                        <v-icon>mdi-comment-question</v-icon>
+                    </v-list-item-action>
+                    <v-list-item-content>
+                        <v-list-item-title>Konsultasi</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
+
+                <v-list-item active link @click="goToUrl('/achievement')">
+                    <v-list-item-action>
+                        <v-icon>mdi-trophy</v-icon>
+                    </v-list-item-action>
+                    <v-list-item-content>
+                        <v-list-item-title>Prestasi</v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
+
                 <v-divider></v-divider>
-                <v-list-item link>
+                <v-list-item link @click="logout">
                     <v-list-item-action>
                         <v-icon>mdi-account-arrow-right</v-icon>
                     </v-list-item-action>
@@ -92,6 +127,9 @@
     <v-footer color="indigo" app>
         <span class="white--text">&copy; 2020</span>
     </v-footer>
+    <!-- Authentication -->
+    <form @submit.prevent="logout">
+    </form>
 </v-app>
 </template>
 
@@ -127,7 +165,12 @@ export default {
                 only: [],
                 headers: {},
             })
-        }
+        },
+        logout() {
+            axios.post('/logout').then(response => {
+                window.location = '/';
+            })
+        },
     }
 
 }
