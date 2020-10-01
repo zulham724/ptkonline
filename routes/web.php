@@ -5,6 +5,8 @@ use App\Http\Controllers\PretestController;
 use App\Http\Controllers\PosttestController;
 use App\Http\Controllers\ClassroomResearchController;
 use App\Http\Controllers\ClassroomResearchFormatController;
+use App\Http\Controllers\TrainingMaterialController;
+use App\Http\Controllers\PostController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -29,13 +31,18 @@ Route::get('/', function () {
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function(){
     Route::get('/dashboard', function () {
-        return Inertia\Inertia::render('Home',['title'=>'Selamat Datang di Dashboard Penelitian Tindakan Kelas Guru','image_path'=>asset('storage/images/')]);
+        //$campaigns = \App\Models\Campaign::where('user_id',auth()->user()->id);
+        return Inertia\Inertia::render('Home',['user'=>auth()->user()->load('campaigns'),'title'=>'Selamat Datang di Dashboard Penelitian Tindakan Kelas Guru','image_path'=>asset('storage/images/')]);
     })->name('dashboard');
 
     Route::resource('pretests', PretestController::class);
     Route::resource('posttests', PosttestController::class);
     Route::resource('classroom_researches', ClassroomResearchController::class);
+    Route::resource('training_materials', TrainingMaterialController::class);
+    Route::resource('posts', PostController::class);
+
     Route::get('educational_level/{id}/classroom_research_format',[ClassroomResearchFormatController::class,'getByEducatioanlLevel']);
+    
 
 });
 

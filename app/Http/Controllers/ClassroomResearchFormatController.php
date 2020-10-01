@@ -83,6 +83,8 @@ class ClassroomResearchFormatController extends Controller
         //
     }
     public function getByEducatioanlLevel($id){
-        return ClassroomResearchFormat::where('educational_level_id',$id)->orderBy('id','asc')->get();
+        return \App\Models\EducationalLevel::with(['classroom_research_formats'=>function($query){
+            $query->orderBy('id','asc');
+        }])->findOrFail($id);
     }
 }

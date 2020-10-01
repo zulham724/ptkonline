@@ -86,6 +86,9 @@
 
 <script>
 import VuetifyLayout from './../Layouts/VuetifyLayout'
+// import {
+//     mapState
+// } from "vuex";
 
 export default {
     // Using a render function
@@ -94,14 +97,22 @@ export default {
     // Using the shorthand
     layout: VuetifyLayout,
 
-    props: ["title", "image_path"],
-
+    props: ["user", "title", "image_path"],
+    computed: {
+        //...mapState(["Campaign"]),
+    },
     data() {
         return {
             // loading: false,
             // drawer: null,
             // item: 0
         }
+    },
+    created() {
+        //console.log(this.user)
+        this.$store.commit('User/set', {
+            data: this.user
+        })
     },
     components: {
         VuetifyLayout,

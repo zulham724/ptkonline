@@ -1,24 +1,8 @@
 <template>
 <v-container fluid>
     <v-row class="justify-center">
-        <v-col md="7">
-            <v-card class="mt-n3">
-                <v-list subheader>
-                    <v-subheader>Proposal PTK yang telah dibuat</v-subheader>
-
-                    <v-list-item>
-                        <v-list-item-content>
-                            <v-list-item-title>Penggunaan Metode Pembelajaran Cooperative Integrated Reading Dan Composition Untuk Meningkatkan Kemampuan Siswa Dalam Membaca Dan Menulis Pada Mata Pelajaran Bahasa Indonesia</v-list-item-title>
-                        </v-list-item-content>
-
-                        <v-list-item-icon>
-                            <v-icon @click="test()">
-                                mdi-menu
-                            </v-icon>
-                        </v-list-item-icon>
-                    </v-list-item>
-                </v-list>
-            </v-card>
+        <v-col>
+            <v-data-table :headers="headers" :items="items" class="elevation-1"></v-data-table>
             <div class="d-flex justify-end">
                 <v-btn class="mt-2" color="primary" @click="goToUrl('classroom_researches/create')">Buat Proposal PTK</v-btn>
             </div>
@@ -30,7 +14,6 @@
 </template>
 
 <script>
-import VueFroala from 'vue-froala-wysiwyg';
 import VuetifyLayout from './../../Layouts/VuetifyLayout'
 import {
     mapState
@@ -47,14 +30,31 @@ export default {
 
     data() {
         return {
-            config: {
-                events: {
-                    'froalaEditor.initialized': function () {
-                        console.log('initialized')
-                    }
+            dialog: false,
+            headers: [{
+                    text: 'Judul',
+                    value: 'title'
+                },
+                {
+                    text: 'Tahun',
+                    value: 'year'
+                },
+                {
+                    text: 'Jenjang',
+                    value: 'educational_level.name'
+                },
+                {
+                    text: 'Nama Sekolah',
+                    value: 'school_name'
+                },
+                {
+                    text: 'Aksi',
+                    value: 'action'
                 }
-            },
-            model: 'Edit Your Content Here!'
+            ],
+            // items: [
+
+            // ]
         }
     },
     components: {

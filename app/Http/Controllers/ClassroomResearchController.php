@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClassroomResearch;
+use App\Models\ClassroomResearchContent;
 use Illuminate\Http\Request;
 
 class ClassroomResearchController extends Controller
@@ -14,7 +15,8 @@ class ClassroomResearchController extends Controller
      */
     public function index()
     {
-        return \Inertia\Inertia::render('ClassroomResearch/Index',['items'=>'a']);
+        $data=ClassroomResearch::with('educational_level')->where('user_id',auth()->user()->id)->get();
+        return \Inertia\Inertia::render('ClassroomResearch/Index',['items'=>$data]);
     }
 
     /**
@@ -36,7 +38,25 @@ class ClassroomResearchController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        if($request->has('contents') && $request->has('data')){
+            $classroomResearch = new ClassroomResearch;
+            $classroomResearch->year=$request->data['year'];
+            $classroomResearch->title=$request->data['title'];
+            $classroomResearch->school_name=$request->data['school_name'];
+            $classroomResearch->school_address=$request->data['school_address'];
+            $classroomResearch->educational_level_id=$request->data['educational_level'];
+            $classroomResearch = $request->user()->classroom_researches()->save($classroomResearch);
+
+            foreach($request->contents as $content){
+                $classroomResearchContent = new ClassroomResearchContent;
+                $classroomResearchContent->name = $content['name'];
+                $classroomResearchContent->value = isset($content['html'])?$content['html']:null;
+                $classroomResearch->classroom_research_contents()->save($classroomResearchContent);
+            }
+
+            return redirect()->route('classroom_researches.index');
+            
+        }
     }
 
     /**

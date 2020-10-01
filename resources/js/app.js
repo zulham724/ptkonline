@@ -26,21 +26,24 @@ InertiaProgress.init({
     showSpinner: false,
   })
 
-  // Require Froala Editor js file.
-require('froala-editor/js/froala_editor.pkgd.min.js')
+//import 'codemirror/lib/codemirror.css';
+//import '@toast-ui/editor/dist/toastui-editor.css';
+ 
+//import { Editor } from '@toast-ui/vue-editor';
 
-// Require Froala Editor css files.
-require('froala-editor/css/froala_editor.pkgd.min.css')
-require('froala-editor/css/froala_style.min.css')
-
-// Import and use Vue Froala lib.
-import VueFroala from 'vue-froala-wysiwyg'
+import Vue2Editor from "vue2-editor";
+const swal = window.swal = require('sweetalert2');
 
 Vue.use(InertiaApp);
 Vue.use(InertiaForm);
 Vue.use(PortalVue);
-Vue.use(Vuetify)
-Vue.use(VueFroala)
+Vue.use(Vuetify);
+Vue.use(Vue2Editor);
+const moment = require('moment')
+require('moment/locale/id')
+Vue.use(require('vue-moment'), {
+  moment
+})
 
 const app = document.getElementById('app');
 
@@ -49,6 +52,7 @@ new Vue({
     icons: {
         iconfont: 'mdi', // default - only for display purposes
       },
+    
     vuetify: new Vuetify,
     render: (h) =>
         h(InertiaApp, {

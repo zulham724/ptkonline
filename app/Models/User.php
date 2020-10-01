@@ -58,4 +58,11 @@ class User extends \TCG\Voyager\Models\User
     protected $appends = [
         'profile_photo_url',
     ];
+
+    public function campaigns(){
+        return $this->hasMany('App\Models\Campaign');
+    }
+    public function classroom_researches(){
+        return $this->hasMany('App\Models\ClassroomResearch');
+    }
 }

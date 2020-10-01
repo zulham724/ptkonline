@@ -11,4 +11,11 @@ class ClassroomResearch extends Model
 
     protected $table = 'classroom_researches';
 
+    public function classroom_research_contents(){
+        return $this->hasMany('App\Models\ClassroomResearchContent');
+    }
+    public function educational_level(){
+        return $this->belongsTo('App\Models\EducationalLevel');
+    }
+
 }

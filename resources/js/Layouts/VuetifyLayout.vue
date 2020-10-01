@@ -21,12 +21,14 @@
                     </template>
 
                     <v-list-item link @click="goToUrl('/pretests')">
-                        <v-list-item-content>
-                            <v-list-item-title>Pre Tes</v-list-item-title>
-                        </v-list-item-content>
+                        <v-list-item-title>Pre Tes</v-list-item-title>
+                        <v-list-item-icon v-if="getCampaigns && getCampaigns.length>0">
+                            <v-icon color="primary">mdi-check</v-icon>
+                        </v-list-item-icon>
+
                     </v-list-item>
 
-                    <v-list-item>
+                    <v-list-item link @click="goToUrl('/training_materials')">
                         <v-list-item-content>
                             <v-list-item-title>Materi Pelatihan</v-list-item-title>
                         </v-list-item-content>
@@ -34,24 +36,25 @@
 
                     <v-list-group :value="true" no-action sub-group>
                         <template v-slot:activator>
-                            <v-list-item-content>
-                                <v-list-item-title>Praktik</v-list-item-title>
-                            </v-list-item-content>
+                            <v-list-item-title>Praktik</v-list-item-title>
+                            <v-list-item-icon>
+                                <v-icon color="primary">mdi-check</v-icon>
+                            </v-list-item-icon>
                         </template>
 
                         <v-list-item link @click="goToUrl('/classroom_researches')">
                             <v-list-item-title>List PTK</v-list-item-title>
 
-                            <v-list-item-icon>
+                            <!--<v-list-item-icon>
                                 <v-icon>mdi-file-outline</v-icon>
-                            </v-list-item-icon>
+                            </v-list-item-icon>-->
                         </v-list-item>
                         <v-list-item link @click="goToUrl('/classroom_researches/create')">
                             <v-list-item-title>Buat PTK</v-list-item-title>
 
-                            <v-list-item-icon>
+                            <!--<v-list-item-icon>
                                 <v-icon>mdi-file-outline</v-icon>
-                            </v-list-item-icon>
+                            </v-list-item-icon>-->
                         </v-list-item>
                     </v-list-group>
 
@@ -63,7 +66,7 @@
 
                 </v-list-group>
 
-                <v-list-item active link @click="goToUrl('/consultations')">
+                <v-list-item active link @click="goToUrl('/posts')">
                     <v-list-item-action>
                         <v-icon>mdi-comment-question</v-icon>
                     </v-list-item-action>
@@ -134,9 +137,19 @@
 </template>
 
 <script>
+import {
+    mapState
+} from "vuex";
 export default {
     props: {
         source: String,
+        campaigns: Array
+    },
+    computed: {
+        ...mapState(["User"]),
+        getCampaigns: function () {
+            return this.User.data ? this.User.data.campaigns : null;
+        }
     },
     data() {
         return {
@@ -154,6 +167,7 @@ export default {
     mounted() {
         //alert('as')
     },
+
     methods: {
         goToUrl(url) {
             this.$inertia.visit(url, {

@@ -15,7 +15,7 @@ class PretestController extends Controller
     public function index()
     {
         //return Pretest::withCount('question_lists')->get();
-        return \Inertia\Inertia::render('Pretest/Index',['items'=>Pretest::withCount('question_lists')->get()]);
+        return \Inertia\Inertia::render('Pretest/Index',['user'=>auth()->user()->load('campaigns'), 'items'=>Pretest::withCount('question_lists')->get()]);
     }
 
     /**
@@ -36,7 +36,38 @@ class PretestController extends Controller
      */
     public function store(Request $request)
     {
-        return $request;
+        if($request->has('question_lists')){
+            $campaign = $request->user()->campaigns()->save(new \App\Models\Campaign);
+
+            // $request->user
+            foreach($request->question_lists as $question_list){
+                
+                $question = \App\Models\QuestionList::findOrFail($question_list['id']);
+                $question_db = new \App\Models\Question;
+                $question_db->question_list_id = $question->id;
+                $question_db->value = $question->value;
+
+                $campaign->questions()->save($question_db);
+
+                $answer_db = new \App\Models\Answer; 
+                if($question->question_list_type->name=="selectoptions"){
+                    $answer = \App\Models\AnswerList::findOrFail($question_list['answer']);
+                    $answer_db->answer_list_id = $answer->id;
+                    $answer_db->value = $answer->value;
+                    $answer_db->score = $answer->score;
+                }else{
+                    $answer_db->answer_list_id = null;
+                    $answer_db->value = $question_list['answer'];
+                }
+               
+               
+
+                $question_db->answer()->save($answer_db);
+
+
+            }
+            return redirect()->route('pretests.index');
+        }
     }
 
     /**
@@ -47,15 +78,42 @@ class PretestController extends Controller
      */
     public function show(Pretest $pretest)
     {
+        
+        // //soal pilihan ganda
+        // $selectoptions = Pretest::with(['question_lists'=>function($query){
+        //     $query->with(['answer_lists'=>function($query2){
+        //         $query2->select('answer_lists.id','answer_lists.value','answer_lists.question_list_id');
+        //     },'question_list_type'])->whereHas('question_list_type',function($query3){
+        //         $query3->where('name','selectoptions');
+        //     });
+
+        //     $query->whereHas('question_list_type',function($query2){
+        //         $query2->where('name','textfield');
+        //     });
+            
+        // }])->findOrFail($pretest_id);
+        // return $selectoptions;
+        //  //soal uraian
+        // $textfield = Pretest::with(['question_lists'=>function($query){
+        //     $query->whereHas('question_list_type',function($query2){
+        //         $query2->where('name','textfield');
+        //     });
+        // }])->findOrFail($pretest_id);
+        // //return $textfield;
         $pretest->load(['question_lists.question_list_type','question_lists.answer_lists'=>function($query){
             $query->select('answer_lists.id','answer_lists.value','answer_lists.question_list_id');
-        }]);
-        $pretest->question_lists->transform(function($item, $key){
+        }])->whereHas('question_lists',function($query){
+            //$query->where
+        });
+        $pretest->question_lists->transform(function($item,$key){
             $item->answer=null;
+            if($item->question_list_type->name=='textfield')unset($item['answer_lists']);
             return $item;
         });
         //return $pretest;
-        return \Inertia\Inertia::render('Pretest/Show',['data'=>$pretest]);
+  
+        //return $data;
+        return \Inertia\Inertia::render('Pretest/Show',['user'=>auth()->user()->load('campaigns'),'data'=>$pretest]);
 
     }
 
