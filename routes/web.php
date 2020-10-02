@@ -7,6 +7,7 @@ use App\Http\Controllers\ClassroomResearchController;
 use App\Http\Controllers\ClassroomResearchFormatController;
 use App\Http\Controllers\TrainingMaterialController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\CommentController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -40,7 +41,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function(){
     Route::resource('classroom_researches', ClassroomResearchController::class);
     Route::resource('training_materials', TrainingMaterialController::class);
     Route::resource('posts', PostController::class);
-
+    Route::resource('posts.comments', CommentController::class);
     Route::get('educational_level/{id}/classroom_research_format',[ClassroomResearchFormatController::class,'getByEducatioanlLevel']);
     
 

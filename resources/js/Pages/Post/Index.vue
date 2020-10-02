@@ -13,32 +13,62 @@
     </v-row>
     <v-divider />
     <v-list three-line>
-        <template v-for="(item, index) in items">
-            <!--<v-subheader v-if="item.header" :key="item.header" v-text="item.header"></v-subheader>
+        <v-list-group v-for="(item, index) in items.data" :key="index" no-action>
+            <template v-slot:activator>
+                <!--<v-subheader v-if="item.header" :key="item.header" v-text="item.header"></v-subheader>
 
             <v-divider v-else-if="item.divider" :key="index" :inset="item.inset"></v-divider>-->
 
-            <v-list-item :key="item.title" link>
+                <v-list-item :key="item.title">
+                    <v-list-item-avatar>
+                        <v-img :src="item.user.avatar"></v-img>
+                    </v-list-item-avatar>
+
+                    <v-list-item-content>
+                        <v-list-item-title v-html="item.user.name"></v-list-item-title>
+                        <v-list-item-subtitle class="text--primary" v-html="item.title"></v-list-item-subtitle>
+                        <v-list-item-subtitle v-text="item.body"></v-list-item-subtitle>
+                        <v-list-item-subtitle class="mt-1 text-caption" v-text="item.comments_count+' Komentar'"></v-list-item-subtitle>
+                    </v-list-item-content>
+
+                    <v-list-item-action>
+                        <v-list-item-action-text>{{item.created_at | moment("from", "now")}}</v-list-item-action-text>
+
+                    </v-list-item-action>
+                </v-list-item>
+                <v-divider />
+            </template>
+            <v-subheader inset>
+                Komentar
+            </v-subheader>
+            <v-list-item v-for="comment in item.comments" :key="`comment${comment.id}`">
+
                 <v-list-item-avatar>
-                    <v-img :src="item.user.avatar"></v-img>
+                    <v-img :src="comment.user.avatar"></v-img>
                 </v-list-item-avatar>
 
                 <v-list-item-content>
-                    <v-list-item-title v-html="item.user.name"></v-list-item-title>
-                    <v-list-item-subtitle class="text--primary" v-html="item.title"></v-list-item-subtitle>
-                    <v-list-item-subtitle v-text="item.body"></v-list-item-subtitle>
-                    <v-list-item-subtitle class="mt-1 text-caption" v-text="item.comments_count+' Komentar'"></v-list-item-subtitle>
+                    <v-list-item-title v-html="comment.user.name"></v-list-item-title>
+                    <v-list-item-subtitle v-text="comment.value"></v-list-item-subtitle>
                 </v-list-item-content>
 
                 <v-list-item-action>
-                    <v-list-item-action-text>{{item.created_at | moment("from", "now")}}</v-list-item-action-text>
+                    <v-list-item-action-text>{{comment.created_at | moment("from", "now")}}</v-list-item-action-text>
 
                 </v-list-item-action>
 
             </v-list-item>
-            <v-divider v-if="index < items.length - 1" :key="index"></v-divider>
-        </template>
+            <v-list-item>
+                <v-text-field :disabled="loading" label="Tulis komentar" v-model="item.comment" clearable dense outlined append-outer-icon="mdi-send" @click:append-outer="sendComment(index)"></v-text-field>
+            </v-list-item>
+            <v-divider />
+        </v-list-group>
     </v-list>
+
+    <div class="text-center">
+        <v-pagination v-on:input="input" v-model="page" :length="pagination_length" circle></v-pagination>
+    </div>
+
 </v-container>
 </template>
 
@@ -55,16 +85,20 @@ export default {
     // Using the shorthand
     layout: VuetifyLayout,
 
-    props: ["items"],
-
+    props: ["items", "pagination_length"],
+    created() {
+        this.page = this.items.current_page;
+    },
     data() {
         return {
             valid: true,
+            valid2: true,
             body: '',
             title: '',
-            // items: [
+            comment: '',
+            page: 1,
+            loading: false,
 
-            // ]
         }
     },
     components: {
@@ -72,6 +106,9 @@ export default {
         //Welcome,
     },
     methods: {
+        input(page) {
+            this.goToUrl('/posts?page=' + this.page)
+        },
         goToUrl(url) {
             this.$inertia.visit(url, {
                 method: 'get',
@@ -81,6 +118,19 @@ export default {
                 preserveScroll: false,
                 only: [],
                 headers: {},
+            })
+        },
+        sendComment(index) {
+
+            //alert(this.items[index].comment)
+            this.loading = true;
+            const data = this.items.data[index]
+            axios.post('/posts/' + this.items.data[index].id + '/comments', data).then(res => {
+                console.log(res.data)
+                this.items.data[index].comments = res.data
+                this.items.data[index].comments_count = res.data.length
+                this.items.data[index].comment = null;
+                this.loading = false;
             })
         },
         submit() {

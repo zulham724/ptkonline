@@ -16,8 +16,11 @@ class PostController extends Controller
     public function index()
     {
         //return 
-        $posts=Post::withCount('comments')->with('user')->where('status','PUBLISHED')->orderBy('id','desc')->get();
-        return \Inertia\Inertia::render('Post/Index',['user'=>auth()->user()->load('campaigns'), 'items'=>$posts]);
+        $itemsPerPage=10;
+        $posts_count = Post::count();
+        $posts=Post::withCount('comments')->with('comments.user','user')->where('status','PUBLISHED')->orderBy('id','desc')->paginate($itemsPerPage);
+        //return $posts;
+        return \Inertia\Inertia::render('Post/Index',['user'=>auth()->user()->load('campaigns'), 'items'=>$posts,'pagination_length'=>ceil($posts_count/$itemsPerPage)]);
     }
 
     /**
