@@ -12,6 +12,9 @@
         </v-col>
     </v-row>
     <v-divider />
+    <v-subheader>
+        Pertanyaan
+    </v-subheader>
     <v-list three-line>
         <v-list-group v-for="(item, index) in items.data" :key="index" no-action>
             <template v-slot:activator>

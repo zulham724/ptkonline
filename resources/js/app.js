@@ -39,6 +39,8 @@ Vue.use(InertiaForm);
 Vue.use(PortalVue);
 Vue.use(Vuetify);
 Vue.use(Vue2Editor);
+Vue.component('pretest-question-list',require("./components/admin/PretestQuestionList.vue").default);
+
 const moment = require('moment')
 require('moment/locale/id')
 Vue.use(require('vue-moment'), {

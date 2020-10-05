@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PretestController;
+use App\Http\Controllers\Admin\PretestAdminController;
 use App\Http\Controllers\PosttestController;
 use App\Http\Controllers\ClassroomResearchController;
 use App\Http\Controllers\ClassroomResearchFormatController;
@@ -53,9 +54,25 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function(){
 // })->name('dashboard');
 
 Route::get('/test', function(){
-    return asset('storage/images/');
+    return mix.js('resources/js/app.js', 'public/js');
 });
 
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
+
+    Route::middleware('admin.user')->group(function(){
+        Route::get('custom_pretest_question_lists',function(){
+            return view('custom_pretest');
+        })->name('custom_pretest_question_lists.index');
+
+        Route::get('getpretests',function(){
+            return \App\Models\Pretest::all(); 
+        });
+        Route::get('getpretestquestionlists/{pretest_id}', function($pretest_id){
+            return \App\Models\Pretest::with('question_lists.answer_lists','question_lists.question_list_type')->findOrFail($pretest_id);
+        });
+        Route::post('pretestquestionlists', [PretestAdminController::class, 'store']);
+    });
+   
 });
+
