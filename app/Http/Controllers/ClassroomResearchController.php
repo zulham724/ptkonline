@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ClassroomResearch;
 use App\Models\ClassroomResearchContent;
 use Illuminate\Http\Request;
-
+use App\Jobs\ProcessClassRoomResearch;
 class ClassroomResearchController extends Controller
 {
     /**
@@ -53,7 +53,7 @@ class ClassroomResearchController extends Controller
                 $classroomResearchContent->value = isset($content['html'])?$content['html']:null;
                 $classroomResearch->classroom_research_contents()->save($classroomResearchContent);
             }
-
+            ProcessClassRoomResearch::dispatch($classroomResearch);
             return redirect()->route('classroom_researches.index');
             
         }

@@ -48,6 +48,10 @@ export default {
                     value: 'school_name'
                 },
                 {
+                    text: 'Tingkat plagiarism',
+                    value: 'plagiarism_score'
+                },
+                {
                     text: 'Aksi',
                     value: 'action'
                 }
