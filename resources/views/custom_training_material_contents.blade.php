@@ -1,6 +1,12 @@
 <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+
+  <!-- Include stylesheet -->
+<link href="https://cdn.quilljs.com/1.3.4/quill.core.css" rel="stylesheet">
+<link href="https://cdn.quilljs.com/1.3.4/quill.snow.css" rel="stylesheet">
+<link href="https://cdn.quilljs.com/1.3.4/quill.bubble.css" rel="stylesheet">
+
 @extends('voyager::master')
 
 @section('page_header')
@@ -38,8 +44,8 @@
                             <v-expansion-panel-header>#@{{i+1}} @{{content.name}}</v-expansion-panel-header>
                             <v-expansion-panel-content>
                                 <v-text-field v-model="content.name" label="Judul konten" placeholder="Tulis judul konten Anda di sini" outlined append-outer-icon="mdi-close" @click:append-outer="removeContent(i)"></v-text-field>
-                                <v-textarea v-model="content.value" label="Isi konten" placeholder="Tulis isi konten Anda di sini" outlined ></v-textarea>
-                                <vue-editor v-model="content.value"></vue-editor>
+                                <!-- <v-textarea v-model="content.value" label="Isi konten" placeholder="Tulis isi konten Anda di sini" outlined ></v-textarea> -->
+                                <quill-editor   :options="editorOption" ref="quillEditorA" v-model="content.value"></quill-editor>
                                
                                 <!-- <div v-if="question_list.question_list_type.name=='selectoptions'">
                                     <div v-for="(answer_list, n) in question_list.answer_lists" :key="`answer${n}`">
@@ -66,39 +72,14 @@
                         </v-expansion-panel>
                     </v-expansion-panels>
                     <div v-if="training_material_id && !loading" class="justify-end d-flex mt-2">
-                    <v-speed-dial
-      v-model="fab"
-      :transition="transition"
-      direction="bottom"
-      
-    >
-      <template v-slot:activator>
-        <v-btn
+                    <v-btn
           v-model="fab"
           color="blue darken-1"
           dark
-          
+          @click="addClassroomMaterialContent"
         >
-         Tambah Soal
+         Tambah Konten
         </v-btn>
-      </template>
-      <v-btn
-        
-        dark
-        @click="addQuestionList('selectoptions')"
-        color="green"
-      >
-        Pilihan Ganda
-      </v-btn>
-      <v-btn
-        
-        dark
-        @click="addQuestionList('textfield')"
-        color="indigo"
-      >
-      Uraian
-      </v-btn>
-    </v-speed-dial>
     <v-btn class="ml-3" color="primary" @click="submit">Submit</v-btn>
     </div>
         </v-container>
@@ -109,19 +90,27 @@
 
 
 @section('javascript')
+<!-- Include the Quill library -->
+<script src="https://cdn.quilljs.com/1.3.4/quill.js"></script>
+<!-- Quill JS Vue -->
+<script src="https://cdn.jsdelivr.net/npm/vue-quill-editor@3.0.4/dist/vue-quill-editor.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-<script src="https://unpkg.com/vue2-editor/dist/vue2-editor.umd.min.js"></script>
-<script src="https://cdn.ckeditor.com/ckeditor5/23.0.0/classic/ckeditor.js"></script>
+<!--<script type="module" src="https://unpkg.com/vue2-editor/dist/vue2-editor.umd.min.js"></script>-->
+
 
 <script>
-Vue.use( CKEditor );
+Vue.use(VueQuillEditor)
 new Vue({ 
     el: '#app',
     vuetify: new Vuetify(),
+
     data:{
+        editorOption: {
+        theme: 'snow'
+      },
         fab:false,
         transition: 'slide-y-transition',
         panels:[],
@@ -187,39 +176,15 @@ new Vue({
                 this.loading=false
             })
         },
-        addAnswerList(question_list_index) {
-            //let current = this.questionnary.question_lists[question_list_index].answer_lists.length + 1
-            this.question_lists[question_list_index].answer_lists.push({
-                value: ''
-            })
-        },
-        addQuestionList(type='selectoptions') {
+
+        addClassroomMaterialContent() {
             let option={
                     value: '',
-                    question_list_type:{
-                        name:'selectoptions',
-                        description:'Pilihan Ganda'
-                    },
-                    answer_lists: [{
-                            value: ''
-                        },
-                        {
-                            value: ''
-                        }
-                    ]
+                    name:''
                 };
-            if(type=='textfield'){
-                option.question_list_type = {
-                        name:'textfield',
-                        description:'Uraian'
-                }
-            }
-            this.question_lists.push(option);
+            this.contents.push(option);
             //console.log(this.panels)
-            this.panels.push(this.question_lists.length - 1);
-        },
-        removeAnswerList(question_list_index, answer_list_index) {
-            this.question_lists[question_list_index].answer_lists.splice(answer_list_index, 1);
+            this.panels.push(this.contents.length - 1);
         },
         removeContent(content_index) {
             if (this.contents.length == 1) {
@@ -260,4 +225,13 @@ new Vue({
 
 })
 </script>
+@stop
+
+@section('css')
+<style type="text/css">
+ .ql-editor strong{
+     font-weight:bold;
+ }
+</style>
+
 @stop
