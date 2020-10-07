@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -35,11 +36,28 @@ class ProcessClassRoomResearch implements ShouldQueue
         $this->classroomResearch->load('classroom_research_contents');
         //print_r($this->classroomResearch);
         //$all
-        $allcontents=\App\Models\ClassroomResearchContent::where('classroom_research_id','!=',$this->classroomResearch->id)->get();
-        foreach($classroomResearch->classroom_research_contents as $classroom_research_content){
-          foreach($allcontents as $content){
-            $plagiarismPercentage = CheckPlagiarism::getPercentage($classroom_research_content,$content);
+        //DB::enableQueryLog(); // Enable query log
+
+        $allpreviouscontents=\App\Models\ClassroomResearchContent::where('classroom_research_id','!=',$this->classroomResearch->id)->where('created_at','<=', $this->classroomResearch->created_at)->get();
+
+        //dd(DB::getQueryLog()); // Show results of log
+        //dd($allpreviouscontents);
+        foreach($this->classroomResearch->classroom_research_contents as $classroom_research_content){
+          $id_values=[];
+          $score_values=[];
+          foreach($allpreviouscontents as $content){
+            $plagiarismPercentage = CheckPlagiarism::getPercentage($classroom_research_content->value,$content->value);
+            array_push($id_values, $content->id);
+            array_push($score_values, $plagiarismPercentage);
           }
+          $plagiarism_db = new \App\Models\Plagiarism;
+          $plagiarism_db->id_values = json_encode($id_values);
+          $plagiarism_db->score_values = json_encode($score_values);
+          $classroom_research_content->plagiarism()->save($plagiarism_db);
+
+          $id_values_count = count($id_values);
+          $classroom_research_content->plagiarism_score =  $id_values_count>=1?array_sum($score_values) / $id_values_count : 0;
+          $classroom_research_content->save();
         }
     }
 }

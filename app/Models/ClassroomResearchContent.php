@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class ClassroomResearchContent extends Model
 {
     use HasFactory;
+
+    public function plagiarism(){
+        return $this->morphOne('App\Models\Plagiarism', 'plagiarism');
+    }
 }

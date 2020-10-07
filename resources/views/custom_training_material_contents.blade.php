@@ -109,13 +109,15 @@
 
 
 @section('javascript')
-<script type="module" src="/js/tes.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-
+<script src="https://unpkg.com/vue2-editor/dist/vue2-editor.umd.min.js"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/23.0.0/classic/ckeditor.js"></script>
 
 <script>
+Vue.use( CKEditor );
 new Vue({ 
     el: '#app',
     vuetify: new Vuetify(),

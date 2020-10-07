@@ -45,6 +45,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function(){
     Route::resource('posts', PostController::class);
     Route::resource('posts.comments', CommentController::class);
     Route::get('educational_level/{id}/classroom_research_format',[ClassroomResearchFormatController::class,'getByEducatioanlLevel']);
+
+    Route::get('classroom_research_plagiarism/{id}', [ClassroomResearchController::class, 'getplagiarism']);
     
 
 });
@@ -55,7 +57,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function(){
 // })->name('dashboard');
 
 Route::get('/test', function(){
-    return voyager_asset('js/app.js');
+    return \App\Models\ClassroomResearch::with(['educational_level',])->where('user_id',auth()->user()->id)->selectRaw('classroom_researches.*')->groupBy('id')->get();
+
 });
 
 Route::group(['prefix' => 'admin'], function () {

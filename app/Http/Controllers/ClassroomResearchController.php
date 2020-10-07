@@ -15,7 +15,11 @@ class ClassroomResearchController extends Controller
      */
     public function index()
     {
-        $data=ClassroomResearch::with('educational_level')->where('user_id',auth()->user()->id)->get();
+        $data=ClassroomResearch::with('educational_level','classroom_research_contents')->where('user_id',auth()->user()->id)->get();
+        foreach($data as $classroomResearch){
+            $classroomResearch->plagiarism_score = round($classroomResearch->classroom_research_contents->avg('plagiarism_score'), 2).'%';
+        }
+        //return $data;
         return \Inertia\Inertia::render('ClassroomResearch/Index',['items'=>$data]);
     }
 
@@ -53,7 +57,7 @@ class ClassroomResearchController extends Controller
                 $classroomResearchContent->value = isset($content['html'])?$content['html']:null;
                 $classroomResearch->classroom_research_contents()->save($classroomResearchContent);
             }
-            ProcessClassRoomResearch::dispatch($classroomResearch);
+            ProcessClassRoomResearch::dispatch($classroomResearch); 
             return redirect()->route('classroom_researches.index');
             
         }
@@ -102,5 +106,9 @@ class ClassroomResearchController extends Controller
     public function destroy(ClassroomResearch $classroomResearch)
     {
         //
+    }
+    public function getplagiarism($id){
+        $res = ClassroomResearch::with('classroom_research_contents')->findOrFail($id);
+        return $res;
     }
 }

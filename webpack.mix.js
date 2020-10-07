@@ -16,3 +16,5 @@ mix.js('resources/js/app.js', 'public/js')
         require('postcss-import'),
         require('tailwindcss'),
     ]);
+
+//mix.js('vendor/tcg/voyager/resources/assets/js/app.js','vendor/tcg/voyager/publishable/assets/js');
