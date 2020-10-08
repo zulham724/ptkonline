@@ -65,4 +65,7 @@ class User extends \TCG\Voyager\Models\User
     public function classroom_researches(){
         return $this->hasMany('App\Models\ClassroomResearch');
     }
+    public function profile(){
+        return $this->hasOne('App\Models\Profile');
+    }
 }

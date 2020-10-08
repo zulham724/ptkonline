@@ -5,6 +5,7 @@ use App\Http\Controllers\PretestController;
 use App\Http\Controllers\Admin\PretestAdminController;
 use App\Http\Controllers\Admin\PosttestAdminController;
 use App\Http\Controllers\Admin\TrainingMaterialAdminController;
+use App\Http\Controllers\Admin\UserAdminController;
 use App\Http\Controllers\PosttestController;
 use App\Http\Controllers\ClassroomResearchController;
 use App\Http\Controllers\ClassroomResearchFormatController;
@@ -58,7 +59,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function(){
 // })->name('dashboard');
 
 Route::get('/test', function(){
-    return \App\Models\ClassroomResearch::with(['educational_level',])->where('user_id',auth()->user()->id)->selectRaw('classroom_researches.*')->groupBy('id')->get();
+    return \App\Models\User::with('profile.educational_level')->get();
 
 });
 
@@ -106,6 +107,8 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('userreports',function(){
             return view('userreports');
         })->name('userreports.index');
+
+        Route::post('getuserslistpagination',[UserAdminController::class,'userslist']);
     });
    
 });

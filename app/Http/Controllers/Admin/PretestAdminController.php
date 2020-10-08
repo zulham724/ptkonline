@@ -60,6 +60,7 @@ class PretestAdminController extends Controller
                             $answer_list_db = new \App\Models\AnswerList;
                         }
                         $answer_list_db->value = $answer_list['value'];
+                        $answer_list_db->score = $answer_list['score']??null;
                         $question_list_db->answer_lists()->save($answer_list_db);
                         array_push($answer_list_ids, $answer_list_db->id);
                     }

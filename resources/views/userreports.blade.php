@@ -1,4 +1,7 @@
-@extends('voyager::master')
+
+<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">@extends('voyager::master')
 
 @section('page_header')
 
@@ -10,7 +13,27 @@
 
 
 @section('content')
-
+<div id="app">
+    <v-app>
+        <v-main>
+        <v-container fluid>
+        <v-data-table :expanded.sync="expanded" show-expand  :footer-props="{
+        'items-per-page-options': [5, 10, 50, 100, 500, -1]
+    }" :loading="loading" :server-items-length="totalData" :options.sync="options" :headers="headers" :items="items" class="elevation-1">
+    <template v-slot:item.email_verified_at="{item}">
+   @{{new Date(item.email_verified_at).toLocaleString('id-ID', { timeZone: 'UTC' })}}
+    </template>
+    <template v-slot:expanded-item="{ headers, item }">
+      <td :colspan="headers.length">
+        More info about @{{ item.name }}
+      </td>
+    </template>
+    </v-data-table>
+        </v-container>
+       
+        </v-main>
+    </v-app>
+</div>
 @stop
 
 @section('javascript')
@@ -18,23 +41,21 @@
 <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+
 <script>
 new Vue({ 
     el: '#app',
     vuetify: new Vuetify(),
     data:{
+        expanded: [],
         educational_level_options: [],
             role_options: [],
             province_options: [],
             filter_options: {
                 age_range: [0, 100],
                 gender: '-',
-                is_pns: '-',
-                certified: '-',
-                school_status: '-',
                 educational_level: '-',
-                role: '-',
-                province: [-1]
             },
             select: null,
             dialog: false,
@@ -53,17 +74,8 @@ new Vue({
                     value: 'email'
                 },
                 {
-                    text: 'Nomor KTA',
-                    value: 'kta_id'
-                },
-                {
-
-                    text: 'Hak Akses',
-                    value: 'role.display_name'
-                },
-                {
-                    text: 'Point',
-                    value: 'point'
+                    text: 'Jenjang yang diajar',
+                    value: 'profile.educational_level.name'
                 },
                 {
                     text: 'Waktu aktivasi',
@@ -79,124 +91,79 @@ new Vue({
 
     },
     methods:{
-        submit(){
-            //Swal.enableLoading();
-            //return;
-            Swal.fire({
-                title: 'Konfirmasi',
-                text: "Submit soal dan jawaban yang dibuat?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, submit',
-                showLoaderOnConfirm: true,
-                preConfirm: (login) => {
-                    return axios.post('/admin/posttestquestionlists', {posttest_id:this.posttest_id, question_lists:this.question_lists}).then(res=>{
-                       console.log(res.data)
-                       this.loading=false;
-                       if (!res.data) {
-                        throw new Error(res.statusText)
-                        }
-                        return res.data
-                   }).catch(error=>{
-                    Swal.showValidationMessage(
-                        `Request failed: ${error}`
-                        )
-                   })
-                },
-              
-            }).then((result) => {
-               
-                if (result.isConfirmed) {
-                   // Swal.showLoading();
-                   this.loading=false;
-                   this.panels=[]
-                   Swal.fire({
-                        title: `Sukses`,
-                        text:'Soal post tes berhasil disimpan'
-                    })
-                }
-            })
+        filterData: function () {
+            this.getDataFromApi().then(() => {
+                this.dialog = false;
+            });
         },
-        getQuestionLists(){
-            this.loading=true
-            axios.get('/admin/getposttestquestionlists/'+this.posttest_id).then(res=>{
-                console.log(res.data)
-                this.question_lists = res.data.question_lists;
-                this.loading=false
-            })
-        },
-        addAnswerList(question_list_index) {
-            //let current = this.questionnary.question_lists[question_list_index].answer_lists.length + 1
-            this.question_lists[question_list_index].answer_lists.push({
-                value: ''
-            })
-        },
-        addQuestionList(type='selectoptions') {
-            let option={
-                    value: '',
-                    question_list_type:{
-                        name:'selectoptions',
-                        description:'Pilihan Ganda'
-                    },
-                    answer_lists: [{
-                            value: ''
-                        },
-                        {
-                            value: ''
-                        }
-                    ]
-                };
-            if(type=='textfield'){
-                option.question_list_type = {
-                        name:'textfield',
-                        description:'Uraian'
-                }
-            }
-            this.question_lists.push(option);
-            //console.log(this.panels)
-            this.panels.push(this.question_lists.length - 1);
-        },
-        removeAnswerList(question_list_index, answer_list_index) {
-            this.question_lists[question_list_index].answer_lists.splice(answer_list_index, 1);
-        },
-        removeQuestionList(question_list_index) {
-            if (this.question_lists.length == 1) {
-                Swal.fire({
-                    title: 'Tidak bisa menghapus',
-                    text: 'Post tes harus memiliki minimal 1 soal',
-                    icon: 'warning',
-                })
-            } else {
-                Swal.fire({
-                    title: 'Konfirmasi',
-                    text: "Hapus pertanyaan ini dari list soal post tes?",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Ya, hapus!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        this.question_lists.splice(question_list_index, 1);
+        getDataFromApi: function () {
+            return new Promise((resolve) => {
+                this.loading = true;
+                let page=this.options.page?this.options.page:1;
+                let itemsPerPage=this.options.itemsPerPage?this.options.itemsPerPage:10;
 
+                axios.post(`/admin/getuserslistpagination?page=${page}&itemsPerPage=${itemsPerPage}`, this.filter_options).then(res => {
+                    const {
+                        sortBy,
+                        sortDesc,
+                        // page,
+                        // itemsPerPage
+                    } = this.options
+                    console.log(this.options)
+                    this.totalData = res.data.totalUser;
+                    this.items = res.data.data.data; //anjay
+
+                    if (sortBy.length === 1 && sortDesc.length === 1) {
+                        this.items = this.items.sort((a, b) => {
+                            const sortA = a[sortBy[0]]
+                            const sortB = b[sortBy[0]]
+
+                            if (sortDesc[0]) {
+                                if (sortA < sortB) return 1
+                                if (sortA > sortB) return -1
+                                return 0
+                            } else {
+                                if (sortA < sortB) return -1
+                                if (sortA > sortB) return 1
+                                return 0
+                            }
+                        })
                     }
-                })
-            }
-        }
+
+                    // if (itemsPerPage > 0) {
+                    //     this.items = this.items.slice((page - 1) * itemsPerPage, page * itemsPerPage)
+                    // }
+                }).finally(() => {
+                    this.loading = false;
+                    resolve()
+                });
+
+            })
+
+        },
+
+    },
+    watch: {
+        options: {
+            handler(new1,old) {
+                //console.log(new1)
+                //console.log(old)
+                console.log(this.options)
+                this.getDataFromApi();
+                // this.getDataFromApi()
+                //     .then(data => {
+                //         this.desserts = data.items
+                //         this.totalDesserts = data.total
+                //     })
+            },
+            deep: true,
+        },
     },
     created(){
-        //this.posttest_id = parseInt('{{$posttest_id}}')
+        //this.getDataFromApi();
+        this.options.itemsPerPage=10
+        console.log(this.options)
 
-        if(this.posttest_id>=0){
-            this.getQuestionLists();
-        }
-
-        axios.get('/admin/getposttests').then(res=>{
-            this.items=res.data
-        })
-      
     }
 
 })
