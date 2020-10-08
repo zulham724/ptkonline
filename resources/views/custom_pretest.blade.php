@@ -152,7 +152,7 @@ new Vue({
                 confirmButtonText: 'Ya, submit',
                 showLoaderOnConfirm: true,
                 preConfirm: (login) => {
-                    return axios.post('pretestquestionlists', {pretest_id:this.pretest_id, question_lists:this.question_lists}).then(res=>{
+                    return axios.post('/admin/pretestquestionlists', {pretest_id:this.pretest_id, question_lists:this.question_lists}).then(res=>{
                        console.log(res.data)
                        this.loading=false;
                        if (!res.data) {
@@ -181,7 +181,7 @@ new Vue({
         },
         getQuestionLists(){
             this.loading=true
-            axios.get('getpretestquestionlists/'+this.pretest_id).then(res=>{
+            axios.get('/admin/getpretestquestionlists/'+this.pretest_id).then(res=>{
                 console.log(res.data)
                 this.question_lists = res.data.question_lists;
                 this.loading=false
@@ -247,8 +247,13 @@ new Vue({
         }
     },
     created(){
-        
-        axios.get('getpretests').then(res=>{
+        this.pretest_id = parseInt('{{$pretest_id}}')
+
+        if(this.pretest_id>=0){
+            this.getQuestionLists();
+        }
+
+        axios.get('/admin/getpretests').then(res=>{
             this.items=res.data
         })
       

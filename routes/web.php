@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PretestController;
 use App\Http\Controllers\Admin\PretestAdminController;
 use App\Http\Controllers\Admin\PosttestAdminController;
+use App\Http\Controllers\Admin\TrainingMaterialAdminController;
 use App\Http\Controllers\PosttestController;
 use App\Http\Controllers\ClassroomResearchController;
 use App\Http\Controllers\ClassroomResearchFormatController;
@@ -65,12 +66,12 @@ Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
 
     Route::middleware('admin.user')->group(function(){
-        Route::get('custom_pretest_question_lists',function(){
-            return view('custom_pretest');
+        Route::get('custom_pretest_question_lists/{pretest_id?}',function($pretest_id=null){
+            return view('custom_pretest',['pretest_id'=>$pretest_id]);
         })->name('custom_pretest_question_lists.index');
 
-        Route::get('custom_posttest_question_lists',function(){
-            return view('custom_posttest');
+        Route::get('custom_posttest_question_lists/{posttest_id?}',function($posttest_id=null){
+            return view('custom_posttest',['posttest_id'=>$posttest_id]);
         })->name('custom_posttest_question_lists.index');
 
         Route::get('custom_training_material_contents/{training_material_id?}',function($training_material_id=null){
@@ -96,9 +97,15 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('gettrainingmaterialcontents/{training_material_id}', function($training_material_id){
             return \App\Models\TrainingMaterial::with('training_material_contents')->findOrFail($training_material_id);
         });
-
+        
         Route::post('pretestquestionlists', [PretestAdminController::class, 'store']);
         Route::post('posttestquestionlists', [PosttestAdminController::class, 'store']);
+        Route::post('trainingmaterialcontents', [TrainingMaterialAdminController::class, 'store']);
+
+        //user reports
+        Route::get('userreports',function(){
+            return view('userreports');
+        })->name('userreports.index');
     });
    
 });

@@ -80,7 +80,7 @@
         >
          Tambah Konten
         </v-btn>
-    <v-btn class="ml-3" color="primary" @click="submit">Submit</v-btn>
+    <v-btn class="ml-3" color="primary" @click="submit" @click="su">Submit</v-btn>
     </div>
         </v-container>
         </v-main>
@@ -133,7 +133,7 @@ new Vue({
             //return;
             Swal.fire({
                 title: 'Konfirmasi',
-                text: "Submit soal dan jawaban yang dibuat?",
+                text: "Submit materi pelatihan?",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
@@ -141,7 +141,7 @@ new Vue({
                 confirmButtonText: 'Ya, submit',
                 showLoaderOnConfirm: true,
                 preConfirm: (login) => {
-                    return axios.post('posttestquestionlists', {posttest_id:this.posttest_id, question_lists:this.question_lists}).then(res=>{
+                    return axios.post('/admin/trainingmaterialcontents', {training_material_id:this.training_material_id, contents:this.contents}).then(res=>{
                        console.log(res.data)
                        this.loading=false;
                        if (!res.data) {
@@ -163,7 +163,7 @@ new Vue({
                    this.panels=[]
                    Swal.fire({
                         title: `Sukses`,
-                        text:'Soal post tes berhasil disimpan'
+                        text:'Materi pelatihan berhasil disimpan'
                     })
                 }
             })
