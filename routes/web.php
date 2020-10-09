@@ -6,12 +6,16 @@ use App\Http\Controllers\Admin\PretestAdminController;
 use App\Http\Controllers\Admin\PosttestAdminController;
 use App\Http\Controllers\Admin\TrainingMaterialAdminController;
 use App\Http\Controllers\Admin\UserAdminController;
+use App\Http\Controllers\Admin\PosttestCampaignAdminController;
+use App\Http\Controllers\Admin\PretestCampaignAdminController;
+
 use App\Http\Controllers\PosttestController;
 use App\Http\Controllers\ClassroomResearchController;
 use App\Http\Controllers\ClassroomResearchFormatController;
 use App\Http\Controllers\TrainingMaterialController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -59,7 +63,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function(){
 // })->name('dashboard');
 
 Route::get('/test', function(){
-    return \App\Models\User::with('profile.educational_level')->get();
+    return \App\Models\Pretest::with('question_lists.answer_lists','question_lists.question_list_type')->get();
 
 });
 
@@ -92,6 +96,10 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('getpretestquestionlists/{pretest_id}', function($pretest_id){
             return \App\Models\Pretest::with('question_lists.answer_lists','question_lists.question_list_type')->findOrFail($pretest_id);
         });
+        Route::get('getpretestuserlists/{pretest_id}', function(){
+            return \App\Models\Pretest::with('question_lists.answer_lists','question_lists.question_list_type')->findOrFail($pretest_id);
+        });
+
         Route::get('getposttestquestionlists/{posttest_id}', function($posttest_id){
             return \App\Models\Posttest::with('question_lists.answer_lists','question_lists.question_list_type')->findOrFail($posttest_id);
         });
@@ -109,6 +117,10 @@ Route::group(['prefix' => 'admin'], function () {
         })->name('userreports.index');
 
         Route::post('getuserslistpagination',[UserAdminController::class,'userslist']);
+
+        Route::get('pretest_assessment',[PretestCampaignAdminController::class,'index'])->name('pretest_assessment.index');
+        Route::get('posttest_assessment',[PosttestCampaignAdminController::class,'index'])->name('posttest_assessment.index');
+        //Route::get('posttest_assessment');
     });
    
 });

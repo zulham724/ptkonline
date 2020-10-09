@@ -6,8 +6,8 @@
 
     <v-card elevation="1" v-for="(content, n) in data.training_material_contents" :key="n" class="mb-1">
         <v-card-title>{{content.name}}</v-card-title>
-        <v-card-text class="black--text">
-            {{content.value}}
+        <v-card-text v-html="content.value" class="black--text">
+
         </v-card-text>
     </v-card>
 </v-container>

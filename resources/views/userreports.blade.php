@@ -17,6 +17,8 @@
     <v-app>
         <v-main>
         <v-container fluid>
+        <v-row>
+        <v-col lg="12">
         <v-data-table :expanded.sync="expanded" show-expand  :footer-props="{
         'items-per-page-options': [5, 10, 50, 100, 500, -1]
     }" :loading="loading" :server-items-length="totalData" :options.sync="options" :headers="headers" :items="items" class="elevation-1">
@@ -29,6 +31,8 @@
       </td>
     </template>
     </v-data-table>
+    </v-col>
+    </v-row>
         </v-container>
        
         </v-main>
@@ -78,9 +82,22 @@ new Vue({
                     value: 'profile.educational_level.name'
                 },
                 {
+                    text: 'Nilai pre tes',
+                    value: 'profile.educational_level.name'
+                },
+                {
+                    text: 'Nilai post tes',
+                    value: 'profile.educational_level.name'
+                },
+                {
+                    text: 'Jumlah PTK',
+                    value: 'profile.educational_level.name'
+                },
+                {
                     text: 'Waktu aktivasi',
                     value: 'email_verified_at'
                 },
+                
                 // {
                 //     text: 'Action',
                 //     value: 'action'

@@ -40,6 +40,8 @@ class PretestController extends Controller
             $campaign = $request->user()->campaigns()->save(new \App\Models\Campaign);
 
             // $request->user
+            $score=0;
+            $selectoptions_count = $textfield_count = 0;
             foreach($request->question_lists as $question_list){
                 
                 $question = \App\Models\QuestionList::findOrFail($question_list['id']);
@@ -55,17 +57,24 @@ class PretestController extends Controller
                     $answer_db->answer_list_id = $answer->id;
                     $answer_db->value = $answer->value;
                     $answer_db->score = $answer->score;
+                    $selectoptions_count++;
                 }else{
                     $answer_db->answer_list_id = null;
+                    $answer_db->score = null; //jika uraian maka harus koreksi manual
                     $answer_db->value = $question_list['answer'];
+                    $textfield_count++;
                 }
-               
-               
-
+                $score+=$answer_db->score;
                 $question_db->answer()->save($answer_db);
 
-
             }
+             //jika semua soal pilihan ganda, maka langsung hitung skor akhir
+             if($selectoptions_count==count($request->question_lists)){
+                $score=$score/$selectoptions_count;
+                $campaign->value = $score;
+                $campaign->save();
+            }
+          
             return redirect()->route('pretests.index');
         }
     }
