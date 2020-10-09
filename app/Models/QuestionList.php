@@ -15,4 +15,13 @@ class QuestionList extends Model
     public function question_list_type(){
         return $this->belongsTo('App\Models\QuestionListType');
     }
+    public function pretest(){
+        return $this->belongsToMany('App\Models\Pretest','pretest_question_lists');
+    }
+    public function answer(){
+        return $this->hasManyThrough('App\Models\Answer','App\Models\Question');
+    }
+    public function questions(){
+        return $this->hasMany('App\Models\Question');
+    }
 }

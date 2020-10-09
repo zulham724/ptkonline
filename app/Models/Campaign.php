@@ -12,4 +12,10 @@ class Campaign extends Model
     public function questions(){
         return $this->hasMany('App\Models\Question');
     }
+    public function campaign(){
+        return $this->morphTo(__FUNCTION__, 'campaign_type', 'campaign_id');
+    }
+    public function user(){
+        return $this->belongsTo('App\Models\User');
+    }
 }

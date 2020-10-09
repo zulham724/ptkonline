@@ -15,7 +15,10 @@ class PretestController extends Controller
     public function index()
     {
         //return Pretest::withCount('question_lists')->get();
-        return \Inertia\Inertia::render('Pretest/Index',['user'=>auth()->user()->load('campaigns'), 'items'=>Pretest::withCount('question_lists')->get()]);
+        $pretest = Pretest::withCount('question_lists')->whereDoesntHave('campaigns',function($query){
+            $query->where('campaigns.user_id','=',auth()->user()->id);
+        })->get();
+        return \Inertia\Inertia::render('Pretest/Index',['user'=>auth()->user()->load('campaigns'), 'items'=>$pretest]);
     }
 
     /**
@@ -36,8 +39,14 @@ class PretestController extends Controller
      */
     public function store(Request $request)
     {
+        //return $request;
         if($request->has('question_lists')){
-            $campaign = $request->user()->campaigns()->save(new \App\Models\Campaign);
+            $pretest = Pretest::findOrFail($request->id);
+            $campaign = new \App\Models\Campaign;
+            $campaign->user_id = auth()->user()->id;
+            $pretest->campaigns()->save($campaign);
+
+            //$campaign = $request->user()->campaigns()->save(new \App\Models\Campaign);
 
             // $request->user
             $score=0;

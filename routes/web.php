@@ -63,7 +63,25 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function(){
 // })->name('dashboard');
 
 Route::get('/test', function(){
-    return \App\Models\Pretest::with('question_lists.answer_lists','question_lists.question_list_type')->get();
+    $campaign_id = 26;
+    $res=\App\Models\Question::with('answer','question_list.answer_lists')->where('campaign_id','=',$campaign_id)->orderBy('question_list_id')->get();
+    return $res;
+    $res=\App\Models\Campaign::with('campaign.question_lists.questions')->whereHasMorph('campaign.question_lists.question','App\Models\Pretest',function($query)use($campaign_id){
+        $query->where('campaign_id','=',$campaign_id);
+    })->findOrFail($campaign_id);
+    return $res;
+    //return \App\Models\QuestionList::with('pretest')->get();
+    // return \DB::table('campaigns')->join('questions','campaigns.id','=','questions.campaign_id')->join('question_lists','questions.question_list_id','=','question_lists.id')->join('pretest_question_lists','pretest_question_lists.question_list_id','=','question_lists.id')->where('pretest_question_lists.pretest_id','=',1)->select('campaigns.id')->groupBy('campaigns.id')->get();
+    
+    // // whereRaw('')->select('campaigns.id')->groupBy('campaigns.id')->get();
+    
+    return \App\Models\Campaign::with('questions.question_list.pretest')->whereHas('questions',function($query){
+        $query->whereHas('question_list',function($query2){
+            $query2->whereHas('pretest',function($query3){
+                $query3->where('pretests.id','=',3);
+            });
+        });
+    })->get();
 
 });
 
@@ -96,9 +114,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('getpretestquestionlists/{pretest_id}', function($pretest_id){
             return \App\Models\Pretest::with('question_lists.answer_lists','question_lists.question_list_type')->findOrFail($pretest_id);
         });
-        Route::get('getpretestuserlists/{pretest_id}', function(){
-            return \App\Models\Pretest::with('question_lists.answer_lists','question_lists.question_list_type')->findOrFail($pretest_id);
-        });
+        Route::get('getpretestcampaignlists/{pretest_id}', [PretestCampaignAdminController::class,'getpretestcampaignlists']);
 
         Route::get('getposttestquestionlists/{posttest_id}', function($posttest_id){
             return \App\Models\Posttest::with('question_lists.answer_lists','question_lists.question_list_type')->findOrFail($posttest_id);
@@ -117,6 +133,10 @@ Route::group(['prefix' => 'admin'], function () {
         })->name('userreports.index');
 
         Route::post('getuserslistpagination',[UserAdminController::class,'userslist']);
+
+        Route::post('pretest/{pretest_id}/getcampaignlistpagination',[PretestCampaignAdminController::class,'getcampaignlistpagination']);
+
+        Route::get('pretest/getcampaignquestionlist/{campaign_id}',[PretestCampaignAdminController::class,'getcampaignquestionlist']);
 
         Route::get('pretest_assessment',[PretestCampaignAdminController::class,'index'])->name('pretest_assessment.index');
         Route::get('posttest_assessment',[PosttestCampaignAdminController::class,'index'])->name('posttest_assessment.index');

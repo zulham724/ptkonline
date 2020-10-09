@@ -12,4 +12,7 @@ class Pretest extends Model
     public function question_lists(){
         return $this->belongsToMany('App\Models\QuestionList','pretest_question_lists');
     }
+    public function campaigns(){
+        return $this->morphMany('\App\Models\Campaign','campaign');
+    }
 }

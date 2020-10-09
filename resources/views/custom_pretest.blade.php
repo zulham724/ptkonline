@@ -34,7 +34,7 @@
             </v-row>
            
             <v-expansion-panels multiple v-model="panels">
-                <v-expansion-panel v-for="(question_list,i) in question_lists" :key="i">
+                <v-expansion-panel v-for="(question_list,i) in question_lists" :key=`${i}`>
                             <v-expansion-panel-header>Pertanyaan #@{{i+1}} @{{question_list.question_list_type.description}}</v-expansion-panel-header>
                             <v-expansion-panel-content>
                                 <v-textarea v-model="question_list.value" label="Pertanyaan" placeholder="Tulis pertanyaan Anda di sini" outlined append-outer-icon="mdi-close" @click:append-outer="removeQuestionList(i)"></v-textarea>
@@ -44,7 +44,7 @@
                                     </v-col>
                                 </v-row>
                                 <div v-if="question_list.question_list_type.name=='selectoptions'">
-                                    <div v-for="(answer_list, n) in question_list.answer_lists" :key="`answer${n}`">
+                                    <div v-for="(answer_list, n) in question_list.answer_lists" :key=`${i}-${n}`>
                                         <v-text-field :color="answer_list.score?'green':''" v-model="answer_list.value" v-if="n<2" class="ml-6" placeholder="Tulis pilihan jawaban" :label="`Jawaban #${n+1}`" outlined>
                                         <template v-slot:prepend>
                                         <v-chip :color="answer_list.score?'green':''" @click="setAnswer(question_list, answer_list)">
@@ -52,7 +52,7 @@
                                         </v-chip>
                                         </template>
                                         </v-text-field>
-                                        <v-text-field :color="answer_list.score?'green':''" v-model="answer_list.value" v-else class="ml-6" placeholder="Tulis pilihan jawaban" :label="`Jawaban #${n+1}`" outlined append-outer-icon="mdi-close" @click:append-outer="removeAnswerList(i,n)">
+                                        <v-text-field :color="answer_list.score?'green':''" v-model="answer_list.value" v-else class="ml-6" placeholder="Tulis pilihan jawaban" :label="`Jawaban #${n+1}`" outlined append-outer-icon="mdi-close" @click:append-outer="removeAnswerList(question_list,n)">
                                         <template v-slot:prepend>
                                         <v-chip :color="answer_list.score?'green':''" @click="setAnswer(question_list, answer_list)">
                                             @{{String.fromCharCode(97+n)}}
@@ -222,8 +222,8 @@ new Vue({
             //console.log(this.panels)
             this.panels.push(this.question_lists.length - 1);
         },
-        removeAnswerList(question_list_index, answer_list_index) {
-            this.question_lists[question_list_index].answer_lists.splice(answer_list_index, 1);
+        removeAnswerList(question_list, answer_list_index) {
+            question_list.answer_lists.splice(answer_list_index, 1);
         },
         removeQuestionList(question_list_index) {
             if (this.question_lists.length == 1) {
@@ -250,11 +250,13 @@ new Vue({
             }
         },
         setAnswer(question_list, answer_list){
+          
             question_list.answer_lists.forEach(v=>{
                 v.score=null;
             })
             answer_list.score=100;
-            //console.log(answer_list)
+            this.$forceUpdate()
+            console.log(answer_list)
         }
     },
     created(){

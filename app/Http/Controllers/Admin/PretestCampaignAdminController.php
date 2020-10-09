@@ -81,6 +81,38 @@ class PretestCampaignAdminController extends Controller
      */
     public function destroy(Pretest $pretest)
     {
-        //
+        
+    }
+    // public function getpretestcampaignlists($pretest_id=null){
+    //     //return 'asu';
+        
+    //     return \App\Models\Campaign::with('questions.question_list.pretest')->whereHas('questions',function($query)use($pretest_id){
+    //         $query->whereHas('question_list',function($query2)use($pretest_id){
+    //             $query2->whereHas('pretest',function($query3)use($pretest_id){
+    //                 $query3->where('pretests.id','=',$pretest_id);
+    //             });
+    //         });
+    //     })->paginate();
+    // }
+    public function getcampaignlistpagination(Request $request, $pretest_id){
+        $itemsPerPage = $request->query('itemsPerPage')?$request->query('itemsPerPage'):10;
+        $res=\App\Models\Campaign::with('user.profile.educational_level','campaign');
+
+        if($pretest_id!='-1'){
+            $res->whereHasMorph('campaign','App\Models\Pretest', function($query)use($pretest_id){
+                $query->where('id',$pretest_id);
+            });
+        }
+        
+        
+
+        return response()->json(['totalData'=>$res->count(),'data'=>$res->paginate($itemsPerPage)]);
+
+
+    }
+    public function getcampaignquestionlist($campaign_id){
+        //return $campaign_id;
+        $res = \App\Models\Question::with('answer','question_list.answer_lists','question_list.question_list_type')->where('campaign_id','=',$campaign_id)->orderBy('question_list_id')->get();
+        return $res;
     }
 }

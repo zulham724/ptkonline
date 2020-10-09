@@ -12,4 +12,8 @@ class Question extends Model
     public function answer(){
         return $this->hasOne('App\Models\Answer');
     }
+    public function question_list(){
+        return $this->belongsTo('App\Models\QuestionList');
+    }
+ 
 }
