@@ -53,7 +53,7 @@ export default {
         },
         beginTest() {
             //console.log(this.model)
-            this.goToUrl('/posttest/' + this.model)
+            this.goToUrl('/posttests/' + this.model)
         }
     }
 }

@@ -63,13 +63,11 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function(){
 // })->name('dashboard');
 
 Route::get('/test', function(){
-    $campaign_id = 26;
-    $res=\App\Models\Question::with('answer','question_list.answer_lists')->where('campaign_id','=',$campaign_id)->orderBy('question_list_id')->get();
-    return $res;
-    $res=\App\Models\Campaign::with('campaign.question_lists.questions')->whereHasMorph('campaign.question_lists.question','App\Models\Pretest',function($query)use($campaign_id){
-        $query->where('campaign_id','=',$campaign_id);
-    })->findOrFail($campaign_id);
-    return $res;
+    return \App\Models\Campaign::with(['questions'=>function($query){
+        $query->whereHas('question_list.question_list_type',function($query2){
+            $query2->where('question_list_types.name','textfield');
+        });
+    }])->get();
     //return \App\Models\QuestionList::with('pretest')->get();
     // return \DB::table('campaigns')->join('questions','campaigns.id','=','questions.campaign_id')->join('question_lists','questions.question_list_id','=','question_lists.id')->join('pretest_question_lists','pretest_question_lists.question_list_id','=','question_lists.id')->where('pretest_question_lists.pretest_id','=',1)->select('campaigns.id')->groupBy('campaigns.id')->get();
     
@@ -140,6 +138,9 @@ Route::group(['prefix' => 'admin'], function () {
 
         Route::get('pretest_assessment',[PretestCampaignAdminController::class,'index'])->name('pretest_assessment.index');
         Route::get('posttest_assessment',[PosttestCampaignAdminController::class,'index'])->name('posttest_assessment.index');
+
+        //submit penilaian
+        Route::post('pretest/campaign/{campaign_id}',[PretestCampaignAdminController::class, 'updateByCampaign']);
         //Route::get('posttest_assessment');
     });
    

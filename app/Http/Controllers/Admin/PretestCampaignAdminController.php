@@ -36,7 +36,7 @@ class PretestCampaignAdminController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        
     }
 
     /**
@@ -70,7 +70,7 @@ class PretestCampaignAdminController extends Controller
      */
     public function update(Request $request, Pretest $pretest)
     {
-        //
+        //return $request;
     }
 
     /**
@@ -112,7 +112,40 @@ class PretestCampaignAdminController extends Controller
     }
     public function getcampaignquestionlist($campaign_id){
         //return $campaign_id;
-        $res = \App\Models\Question::with('answer','question_list.answer_lists','question_list.question_list_type')->where('campaign_id','=',$campaign_id)->orderBy('question_list_id')->get();
-        return $res;
+        $campaign = \App\Models\Campaign::findOrFail($campaign_id);
+        $res = \App\Models\Question::with('answer','question_list.answer_lists','question_list.question_list_type')->where('campaign_id','=',$campaign->id)->orderBy('question_list_id')->get();
+        return response()->json(['questions'=>$res,'campaign'=>$campaign]);
+    }
+
+    public function updatebyCampaign(Request $request, $campaign_id){
+        //hanya pilih soal yg uraian (textfield)
+        // $campaign=\App\Models\Campaign::with(['questions'=>function($query){
+        //     $query->whereHas('question_list.question_list_type',function($query2){
+        //         $query2->where('question_list_types.name','textfield');
+        //     });
+        // }])->findOrFail($campaign_id);
+        
+        $campaign=\App\Models\Campaign::with('questions.question_list.question_list_type')->findOrFail($campaign_id);
+        $questions_collect = collect($request->questions);
+        $totalScore=0;
+        foreach($campaign->questions as $question_db){
+            if($question_db->question_list->question_list_type->name=='textfield'){
+                $index = $questions_collect->search(function($item, $key)use($question_db){
+                    return $item['id']==$question_db->id;
+                });
+                $question_db->answer->score=$questions_collect[$index]['answer']['score'];
+                //dd($questions_collect[$index]['answer']['score']);
+                $question_db->answer->save();
+            }else{
+                $answer_list_db = \App\Models\AnswerList::findOrFail($question_db->answer->answer_list_id);
+                $question_db->answer->score = $answer_list_db->score;
+            }
+            $totalScore += $question_db->answer->score;
+        }
+        $totalScore=$totalScore>0?$totalScore/count($campaign->questions):0;
+        //update score pada model table campaigns
+        $campaign->value = $totalScore;
+        $campaign->save();
+        return $campaign;
     }
 }
