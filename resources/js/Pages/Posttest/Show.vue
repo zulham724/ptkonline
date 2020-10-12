@@ -5,13 +5,21 @@
     <v-card class="mx-auto mb-1" outlined v-for="(question_list, i) in data.question_lists" :key="i">
         <v-card-text>
             {{i+1}}. <span class="black--text">{{question_list.value}}</span>
-            <v-radio-group v-model="question_list.answer" class="mb-n5">
+
+            <v-radio-group v-model="question_list.answer" class="mb-n5" v-if="question_list.question_list_type.name=='selectoptions'">
                 <v-radio v-for="(answer_list, j) in question_list.answer_lists" :key='`answer${j}`' :label="answer_list.value" :value="answer_list.id"></v-radio>
             </v-radio-group>
+            <v-row v-else class="mb-n3">
+                <v-col lg="6">
+                    <v-textarea v-model="question_list.answer" height="100px" outlined dense label="Tulis jawaban">
+                    </v-textarea>
+                </v-col>
+            </v-row>
+
         </v-card-text>
     </v-card>
     <div class="d-flex justify-end">
-        <v-btn color="primary">Submit Jawaban</v-btn>
+        <v-btn color="primary" @click="submit">Submit Jawaban</v-btn>
 
     </div>
 </v-container>
@@ -30,8 +38,10 @@ export default {
     // Using the shorthand
     layout: VuetifyLayout,
 
-    props: ["data"],
-
+    props: ["user", "data"],
+    computed: {
+        ...mapState(["Posttest"])
+    },
     data() {
         return {
             radioGroup: 1,
@@ -42,7 +52,14 @@ export default {
         }
     },
     created() {
-
+        this.data.question_lists.forEach(v => {
+            let find = this.Posttest.question_lists.find(e => e.id == v.id);
+            if (find) v.answer = find.answer;
+            // else v.answer = null
+        })
+        this.$store.commit('User/set', {
+            data: this.user
+        })
     },
     components: {
         VuetifyLayout,
@@ -50,18 +67,59 @@ export default {
     },
     watch: {
         'data.question_lists': {
-            handler: function (val, oldVal) {
+            handler: _.debounce(function (val, oldVal) {
                 //console.log(val)
-                this.$store.commit("QuestionList/set", {
+                this.$store.commit("Posttest/set", {
+                    posttest: {
+                        id: this.data.id,
+                        name: this.data.name
+                    },
                     question_lists: val
                 });
-            },
+            }, 500),
             deep: true,
         }
     },
     methods: {
+        submit() {
+            //let data = t
+            let error = false;
+            for (let question_list of this.data.question_lists) {
+                console.log(question_list)
+                if (!question_list.answer) {
+                    error = true;
+                    break;
+                }
+            }
+            if (error) {
+                swal.fire('Warning', 'Masih ada soal yang belum diisi', 'warning')
+                return;
+            } else {
+                swal.fire({
+                    title: 'Konfirmasi',
+                    text: "Submit soal? Pastikan teliti dalam menjawab soal",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, submit'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.$inertia.post('/posttests', this.data, {
+                            replace: false,
+                            preserveState: true,
+                            preserveScroll: false,
+                            only: [],
+                            headers: {},
+                        })
+                    }
+                })
+
+            }
+
+        },
         beginTest() {
-            this.$store.dispatch("QuestionList/test");
+            this.$store.dispatch("Posttest/test");
         }
     }
 }

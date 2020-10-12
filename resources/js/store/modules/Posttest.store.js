@@ -27,7 +27,7 @@ const mutations = {
     //     state.data={...payload.data, question_lists:[...payload.data.question_lists]}
     //  },
      set( state, payload ) {
-        state.data = payload.pretest;
+        state.data = payload.posttest;
         state.question_lists = [];
         payload.question_lists.forEach(v => {
             let item={}

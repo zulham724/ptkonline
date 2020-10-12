@@ -96,16 +96,15 @@ class PretestCampaignAdminController extends Controller
     // }
     public function getcampaignlistpagination(Request $request, $pretest_id){
         $itemsPerPage = $request->query('itemsPerPage')?$request->query('itemsPerPage'):10;
+
         $res=\App\Models\Campaign::with('user.profile.educational_level','campaign');
 
-        if($pretest_id!='-1'){
-            $res->whereHasMorph('campaign','App\Models\Pretest', function($query)use($pretest_id){
-                $query->where('id',$pretest_id);
-            });
-        }
+        $res->whereHasMorph('campaign','App\Models\Pretest', function($query)use($pretest_id){
+            if($pretest_id!='-1')$query->where('pretests.id',$pretest_id);
+        });
         
         
-
+    
         return response()->json(['totalData'=>$res->count(),'data'=>$res->paginate($itemsPerPage)]);
 
 
@@ -142,7 +141,8 @@ class PretestCampaignAdminController extends Controller
             }
             $totalScore += $question_db->answer->score;
         }
-        $totalScore=$totalScore>0?$totalScore/count($campaign->questions):0;
+        $questions_count = count($campaign->questions);
+        $totalScore=$questions_count>0?$totalScore/$questions_count:0;
         //update score pada model table campaigns
         $campaign->value = $totalScore;
         $campaign->save();

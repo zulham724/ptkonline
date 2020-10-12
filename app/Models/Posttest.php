@@ -12,4 +12,7 @@ class Posttest extends Model
     public function question_lists(){
         return $this->belongsToMany('App\Models\QuestionList','posttest_question_lists');
     }
+    public function campaigns(){
+        return $this->morphMany('\App\Models\Campaign','campaign');
+    }
 }

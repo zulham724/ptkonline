@@ -133,14 +133,17 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('getuserslistpagination',[UserAdminController::class,'userslist']);
 
         Route::post('pretest/{pretest_id}/getcampaignlistpagination',[PretestCampaignAdminController::class,'getcampaignlistpagination']);
+        Route::post('posttest/{posttest_id}/getcampaignlistpagination',[PosttestCampaignAdminController::class,'getcampaignlistpagination']);
 
         Route::get('pretest/getcampaignquestionlist/{campaign_id}',[PretestCampaignAdminController::class,'getcampaignquestionlist']);
+        Route::get('posttest/getcampaignquestionlist/{campaign_id}',[PosttestCampaignAdminController::class,'getcampaignquestionlist']);
 
         Route::get('pretest_assessment',[PretestCampaignAdminController::class,'index'])->name('pretest_assessment.index');
         Route::get('posttest_assessment',[PosttestCampaignAdminController::class,'index'])->name('posttest_assessment.index');
 
         //submit penilaian
         Route::post('pretest/campaign/{campaign_id}',[PretestCampaignAdminController::class, 'updateByCampaign']);
+        Route::post('posttest/campaign/{campaign_id}',[PosttestCampaignAdminController::class, 'updateByCampaign']);
         //Route::get('posttest_assessment');
     });
    
