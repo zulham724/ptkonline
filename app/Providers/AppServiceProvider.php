@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Observers\AnswerListObserver;
 use App\Models\AnswerList;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
