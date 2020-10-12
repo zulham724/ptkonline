@@ -14,7 +14,7 @@ class AddScoreToAnswerListsTable extends Migration
     public function up()
     {
         Schema::table('answer_lists', function (Blueprint $table) {
-            $table->integer('score')->after('value')->nullable();
+            $table->integer('score')->after('value')->nullable()->change();
         });
     }
 
