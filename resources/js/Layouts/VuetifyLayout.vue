@@ -22,7 +22,7 @@
 
                     <v-list-item link @click="goToUrl('/pretests')">
                         <v-list-item-title>Pre Tes</v-list-item-title>
-                        <v-list-item-icon v-if="getCampaigns && getCampaigns.length>0">
+                        <v-list-item-icon v-if="getPretestCampaigns">
                             <v-icon color="primary">mdi-check</v-icon>
                         </v-list-item-icon>
 
@@ -37,7 +37,7 @@
                     <v-list-group :value="true" no-action sub-group>
                         <template v-slot:activator>
                             <v-list-item-title>Praktik</v-list-item-title>
-                            <v-list-item-icon>
+                            <v-list-item-icon v-if="getClassroomResearchCount">
                                 <v-icon color="primary">mdi-check</v-icon>
                             </v-list-item-icon>
                         </template>
@@ -59,9 +59,10 @@
                     </v-list-group>
 
                     <v-list-item link @click="goToUrl('/posttests')">
-                        <v-list-item-content>
-                            <v-list-item-title>Post Tes</v-list-item-title>
-                        </v-list-item-content>
+                        <v-list-item-title>Post Tes</v-list-item-title>
+                        <v-list-item-icon v-if="getPosttestCampaigns">
+                            <v-icon color="primary">mdi-check</v-icon>
+                        </v-list-item-icon>
                     </v-list-item>
 
                 </v-list-group>
@@ -75,7 +76,7 @@
                     </v-list-item-content>
                 </v-list-item>
 
-                <v-list-item active link @click="goToUrl('/achievement')">
+                <v-list-item active link @click="goToUrl('/achievements')">
                     <v-list-item-action>
                         <v-icon>mdi-trophy</v-icon>
                     </v-list-item-action>
@@ -147,8 +148,14 @@ export default {
     },
     computed: {
         ...mapState(["User"]),
-        getCampaigns: function () {
-            return this.User.data ? this.User.data.campaigns : null;
+        getPretestCampaigns: function () {
+            return this.User.data ? this.User.data.pretest_campaigns_count : null;
+        },
+        getPosttestCampaigns: function () {
+            return this.User.data ? this.User.data.posttest_campaigns_count : null;
+        },
+        getClassroomResearchCount: function () {
+            return this.User.data ? this.User.data.classroom_researches_count : null;
         }
     },
     data() {

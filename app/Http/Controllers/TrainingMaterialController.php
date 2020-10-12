@@ -15,7 +15,9 @@ class TrainingMaterialController extends Controller
     public function index()
     {
         //return TrainingMaterial::with('training_material_contents')->get();
-        return \Inertia\Inertia::render('TrainingMaterial/Index',['user'=>auth()->user()->load('campaigns'), 'items'=>TrainingMaterial::all()]);
+        $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
+
+        return \Inertia\Inertia::render('TrainingMaterial/Index',['user'=>$user, 'items'=>TrainingMaterial::all()]);
     }
 
     /**

@@ -17,7 +17,9 @@ class PosttestController extends Controller
         $posttest = Posttest::withCount('question_lists')->whereDoesntHave('campaigns',function($query){
             $query->where('campaigns.user_id','=',auth()->user()->id);
         })->get();
-        return \Inertia\Inertia::render('Posttest/Index',['items'=>$posttest]);
+        $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
+
+        return \Inertia\Inertia::render('Posttest/Index',['user'=>$user, 'items'=>$posttest]);
     }
 
     /**

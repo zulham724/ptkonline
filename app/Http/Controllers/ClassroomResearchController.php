@@ -20,7 +20,9 @@ class ClassroomResearchController extends Controller
             $classroomResearch->plagiarism_score = round($classroomResearch->classroom_research_contents->avg('plagiarism_score'), 2).'%';
         }
         //return $data;
-        return \Inertia\Inertia::render('ClassroomResearch/Index',['items'=>$data]);
+        $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
+
+        return \Inertia\Inertia::render('ClassroomResearch/Index',['user'=>$user,'items'=>$data]);
     }
 
     /**
@@ -30,8 +32,8 @@ class ClassroomResearchController extends Controller
      */
     public function create()
     {
-        
-        return \Inertia\Inertia::render('ClassroomResearch/Create',['educationalLevels'=>\App\Models\EducationalLevel::all()]);
+        $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
+        return \Inertia\Inertia::render('ClassroomResearch/Create',['user'=>$user,'educationalLevels'=>\App\Models\EducationalLevel::all()]);
     }
 
     /**

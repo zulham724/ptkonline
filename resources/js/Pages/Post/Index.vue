@@ -88,7 +88,7 @@ export default {
     // Using the shorthand
     layout: VuetifyLayout,
 
-    props: ["items", "pagination_length"],
+    props: ["user", "items", "pagination_length"],
     created() {
         this.page = this.items.current_page;
     },
@@ -107,6 +107,11 @@ export default {
     components: {
         VuetifyLayout,
         //Welcome,
+    },
+    created() {
+        this.$store.commit('User/set', {
+            data: this.user
+        })
     },
     methods: {
         input(page) {

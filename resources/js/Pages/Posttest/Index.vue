@@ -25,7 +25,7 @@ export default {
     // Using the shorthand
     layout: VuetifyLayout,
 
-    props: ["items"],
+    props: ["items", "user"],
 
     data() {
         return {
@@ -38,6 +38,11 @@ export default {
     components: {
         VuetifyLayout,
         //Welcome,
+    },
+    created() {
+        this.$store.commit('User/set', {
+            data: this.user
+        })
     },
     methods: {
         goToUrl(url) {

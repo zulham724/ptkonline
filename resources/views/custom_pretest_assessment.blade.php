@@ -54,10 +54,10 @@
 
         <v-dialog
           v-model="dialog"
-      hide-overlay
-      width="90%"
-      transition="dialog-bottom-transition"
-    >
+        hide-overlay
+        width="90%"
+        transition="dialog-bottom-transition"
+        >
     <v-card>
         <v-toolbar
           dark

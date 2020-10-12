@@ -20,7 +20,9 @@ class PostController extends Controller
         $posts_count = Post::count();
         $posts=Post::withCount('comments')->with('comments.user','user')->where('status','PUBLISHED')->orderBy('id','desc')->paginate($itemsPerPage);
         //return $posts;
-        return \Inertia\Inertia::render('Post/Index',['user'=>auth()->user()->load('campaigns'), 'items'=>$posts,'pagination_length'=>ceil($posts_count/$itemsPerPage)]);
+        $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
+
+        return \Inertia\Inertia::render('Post/Index',['user'=>$user, 'items'=>$posts,'pagination_length'=>ceil($posts_count/$itemsPerPage)]);
     }
 
     /**

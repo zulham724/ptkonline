@@ -18,4 +18,7 @@ class Campaign extends Model
     public function user(){
         return $this->belongsTo('App\Models\User');
     }
+    // public function pretest_campaign(){
+    //     //return $this->morphTo(__FUNCTION__, 'campaign_type', 'campaign_id');
+    // }
 }

@@ -85,40 +85,16 @@ class UserAdminController extends Controller
     }
     public function userslist(Request $request){
         $itemsPerPage = $request->query('itemsPerPage')?$request->query('itemsPerPage'):10;
-        //return $itemsPerPage;
-       // return $request;
-        //$res=DB::table('users')->join('pns_statuses',);
 
-        //filter gender
-        $filter_options=$request;
-      
-        // $res = User::with('profile.educational_level')->whereHas('profile',function($query)use($filter_options){
-
-        //     // //filter umur
-        //     // $begin_date=\Carbon\Carbon::now()->subYears($filter_options->age_range[1])->format('Y-m-d');
-        //     // $end_date=\Carbon\Carbon::now()->subYears($filter_options->age_range[0])->format('Y-m-d');
-
-        //     // $query->whereBetween('birthdate',[$begin_date, $end_date]);
-
-        //     // //filter gender
-        //     // if($filter_options['gender']=='L' || $filter_options['gender']=='P'){$query->where('gender','=',$filter_options['gender']);
-        //     // }
-
-        //     //  //filter educational_level
-        //     //  if($filter_options['educational_level']!='-')$query->where('educational_level_id','=',$filter_options['educational_level']);
-
-        //     //  //filter school_status
-        //     //  //if($filter_options['school_status']=='Negeri' || $filter_options['school_status']=='Swasta')$query->where('school_status','=',$filter_options['school_status']);
-
-        //     //  //filter province
-        //     //  /*if(!in_array(-1,$filter_options['province'])){
-        //     //     $query->whereIn('province_id',$filter_options['province']);
-        //     //  }*/
-         
-        // });
-        $res = User::with('profile.educational_level');
+        $res = User::with('profile.educational_level','pretest_campaigns.campaign','posttest_campaigns.campaign','classroom_researches.classroom_research_contents','classroom_researches.educational_level')->withCount(['pretest_campaigns','posttest_campaigns','classroom_researches']);
+        $data=$res->paginate($itemsPerPage);
         // $res=\App\User::with('')
-        return ['totalUser'=>$res->count(), 'data'=>$res->paginate($itemsPerPage)];
+        foreach($data->items() as $user){
+            foreach($user['classroom_researches'] as $classroomResearch){
+                $classroomResearch->plagiarism_score = round(collect($classroomResearch['classroom_research_contents'])->avg('plagiarism_score'), 2).'%';
+            }
+        }
+        return ['totalUser'=>$res->count(), 'data'=>$data];
     }
 
 }

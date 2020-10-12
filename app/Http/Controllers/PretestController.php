@@ -18,7 +18,9 @@ class PretestController extends Controller
         $pretest = Pretest::withCount('question_lists')->whereDoesntHave('campaigns',function($query){
             $query->where('campaigns.user_id','=',auth()->user()->id);
         })->get();
-        return \Inertia\Inertia::render('Pretest/Index',['user'=>auth()->user()->load('campaigns'), 'items'=>$pretest]);
+        $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
+
+        return \Inertia\Inertia::render('Pretest/Index',['user'=>$user, 'items'=>$pretest]);
     }
 
     /**

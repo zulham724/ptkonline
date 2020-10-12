@@ -75,7 +75,7 @@ export default {
     // Using the shorthand
     layout: VuetifyLayout,
 
-    props: ["items"],
+    props: ["items", "user"],
     computed: {
         plagiarismAverage() {
             let total = 0;
@@ -144,6 +144,11 @@ export default {
     components: {
         VuetifyLayout,
         //Welcome,
+    },
+    created() {
+        this.$store.commit('User/set', {
+            data: this.user
+        })
     },
     methods: {
 

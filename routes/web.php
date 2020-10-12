@@ -41,7 +41,8 @@ Route::get('/', function () {
 Route::middleware(['auth:sanctum', 'verified'])->group(function(){
     Route::get('/dashboard', function () {
         //$campaigns = \App\Models\Campaign::where('user_id',auth()->user()->id);
-        return Inertia\Inertia::render('Home',['user'=>auth()->user()->load('campaigns'),'title'=>'Selamat Datang di Dashboard Penelitian Tindakan Kelas Guru','image_path'=>asset('storage/images/')]);
+        $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
+        return Inertia\Inertia::render('Home',['user'=>$user,'title'=>'Selamat Datang di Dashboard Penelitian Tindakan Kelas Guru','image_path'=>asset('storage/images/')]);
     })->name('dashboard');
 
     Route::resource('pretests', PretestController::class);
@@ -50,6 +51,11 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function(){
     Route::resource('training_materials', TrainingMaterialController::class);
     Route::resource('posts', PostController::class);
     Route::resource('posts.comments', CommentController::class);
+    Route::get('achievements', function(){
+        $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
+        $items = auth()->user()->load('profile.educational_level','pretest_campaigns.campaign','posttest_campaigns.campaign');
+        return Inertia\Inertia::render('Achievement/Index',['user'=>$user, 'items'=>$items]);
+    })->name('achievements.index');
     Route::get('educational_level/{id}/classroom_research_format',[ClassroomResearchFormatController::class,'getByEducatioanlLevel']);
 
     Route::get('classroom_research_plagiarism/{id}', [ClassroomResearchController::class, 'getplagiarism']);
@@ -63,25 +69,9 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function(){
 // })->name('dashboard');
 
 Route::get('/test', function(){
-    return \App\Models\Campaign::with(['questions'=>function($query){
-        $query->whereHas('question_list.question_list_type',function($query2){
-            $query2->where('question_list_types.name','textfield');
-        });
-    }])->get();
-    //return \App\Models\QuestionList::with('pretest')->get();
-    // return \DB::table('campaigns')->join('questions','campaigns.id','=','questions.campaign_id')->join('question_lists','questions.question_list_id','=','question_lists.id')->join('pretest_question_lists','pretest_question_lists.question_list_id','=','question_lists.id')->where('pretest_question_lists.pretest_id','=',1)->select('campaigns.id')->groupBy('campaigns.id')->get();
-    
-    // // whereRaw('')->select('campaigns.id')->groupBy('campaigns.id')->get();
-    
-    return \App\Models\Campaign::with('questions.question_list.pretest')->whereHas('questions',function($query){
-        $query->whereHas('question_list',function($query2){
-            $query2->whereHas('pretest',function($query3){
-                $query3->where('pretests.id','=',3);
-            });
-        });
-    })->get();
+   return auth()->user()->load('profile.educational_level','pretest_campaigns.campaign','posttest_campaigns.campaign');
 
-});
+})->middleware('auth:sanctum');
 
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();

@@ -15,4 +15,7 @@ class Pretest extends Model
     public function campaigns(){
         return $this->morphMany('\App\Models\Campaign','campaign');
     }
+    public function auth_campaigns(){
+        return $this->morphMany('\App\Models\Campaign','campaign');
+    }
 }

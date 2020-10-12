@@ -68,4 +68,10 @@ class User extends \TCG\Voyager\Models\User
     public function profile(){
         return $this->hasOne('App\Models\Profile');
     }
+    public function pretest_campaigns(){
+        return $this->hasMany('App\Models\Campaign')->where('campaign_type','App\Models\Pretest');
+    }
+    public function posttest_campaigns(){
+        return $this->hasMany('App\Models\Campaign')->where('campaign_type','App\Models\Posttest');
+    }
 }

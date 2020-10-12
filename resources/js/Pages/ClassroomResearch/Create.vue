@@ -66,7 +66,7 @@ export default {
     // Using the shorthand
     layout: VuetifyLayout,
 
-    props: ["items", "educationalLevels"],
+    props: ["items", "educationalLevels", "user"],
     computed: {
         ...mapState(['ClassroomResearch'])
     },
@@ -125,6 +125,11 @@ export default {
         VuetifyLayout,
 
         //Welcome,
+    },
+    created() {
+        this.$store.commit('User/set', {
+            data: this.user
+        })
     },
     methods: {
         submit() {

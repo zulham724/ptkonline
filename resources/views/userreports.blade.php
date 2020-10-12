@@ -27,7 +27,63 @@
     </template>
     <template v-slot:expanded-item="{ headers, item }">
       <td :colspan="headers.length">
-        More info about @{{ item.name }}
+        <v-row>
+            <v-col lg="6">
+                <v-data-table :headers="pretest_headers"  hide-default-footer :items="item.pretest_campaigns">
+                    <template v-slot:item.created_at="{item}">
+                        @{{new Date(item.created_at).toLocaleString('id-ID', { timeZone: 'UTC' })}}
+                    </template>
+                    <template v-slot:item.value="{item}">
+                        <v-chip v-if="item.value===null">
+                        Belum dinilai
+                            
+                        </v-chip>
+                        <v-chip color='info' v-else>
+                        @{{parseFloat(item.value).toString()}}
+                        </v-chip>
+                    </template>
+                </v-data-table>
+            </v-col>
+            <v-col lg="6">
+                <v-data-table :headers="posttest_headers"  hide-default-footer :items="item.posttest_campaigns">
+                    <template v-slot:item.created_at="{item}">
+                        @{{new Date(item.created_at).toLocaleString('id-ID', { timeZone: 'UTC' })}}
+                    </template>
+                    <template v-slot:item.value="{item}">
+                        <v-chip v-if="item.value===null">
+                        Belum dinilai
+                            
+                        </v-chip>
+                        <v-chip color='info' v-else>
+                        @{{parseFloat(item.value).toString()}}
+                        </v-chip>
+                    </template>
+                </v-data-table>
+            </v-col>
+        </v-row>
+        <v-row>
+            <v-col lg='12'>
+                <v-data-table :headers="classroom_research_headers"  hide-default-footer :items="item.classroom_researches">
+                    <template v-slot:item.created_at="{item}">
+                        @{{new Date(item.created_at).toLocaleString('id-ID', { timeZone: 'UTC' })}}
+                    </template>
+                    <template v-slot:item.value="{item}">
+                        <v-chip v-if="item.value===null">
+                        Belum dinilai
+                            
+                        </v-chip>
+                        <v-chip color='info' v-else>
+                        @{{parseFloat(item.value).toString()}}
+                        </v-chip>
+                    </template>
+                    <template v-slot:item.plagiarism_score="{item}">
+                    <v-chip>
+                        @{{item.plagiarism_score}}
+                    </v-chip>
+                    </template>
+                </v-data-table>
+            </v-col>
+        </v-row>
       </td>
     </template>
     </v-data-table>
@@ -67,6 +123,65 @@ new Vue({
             options: {},
             loading: false,
             items: [],
+            pretest_headers:[
+                {
+                    text:'Paket pre tes',
+                    value:'campaign.name'
+                },
+                
+                {
+                    text:'Nilai',
+                    value:'value'
+                },
+                {
+                    text:'Waktu submit',
+                    value:'created_at'
+                },
+
+            ],
+            posttest_headers:[
+                {
+                    text:'Paket post tes',
+                    value:'campaign.name'
+                },
+                
+                {
+                    text:'Nilai',
+                    value:'value'
+                },
+                {
+                    text:'Waktu submit',
+                    value:'created_at'
+                },
+
+            ],
+            classroom_research_headers:[
+                {
+                    text: 'ID',
+                    value: 'id'
+                },
+                {
+                    text: 'Judul',
+                    value: 'title'
+                },
+                {
+                    text: 'Tahun',
+                    value: 'year'
+                },
+                {
+                    text: 'Jenjang',
+                    value: 'educational_level.name'
+                },
+                {
+                    text: 'Nama Sekolah',
+                    value: 'school_name'
+                },
+                {
+                    text: 'Tingkat plagiarism',
+                    value: 'plagiarism_score'
+                },
+
+            ],
             headers: [{
                     text: 'Nama',
                     align: 'start',
@@ -82,16 +197,16 @@ new Vue({
                     value: 'profile.educational_level.name'
                 },
                 {
-                    text: 'Nilai pre tes',
-                    value: 'profile.educational_level.name'
+                    text: 'Pre tes dikerjakan',
+                    value: 'pretest_campaigns_count'
                 },
                 {
-                    text: 'Nilai post tes',
-                    value: 'profile.educational_level.name'
+                    text: 'Post tes dikerjakan',
+                    value: 'posttest_campaigns_count'
                 },
                 {
                     text: 'Jumlah PTK',
-                    value: 'profile.educational_level.name'
+                    value: 'classroom_researches_count'
                 },
                 {
                     text: 'Waktu aktivasi',
