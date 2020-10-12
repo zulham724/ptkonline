@@ -69,7 +69,7 @@
     </v-list>
 
     <div class="text-center">
-        <v-pagination v-on:input="input" v-model="page" :length="pagination_length" circle></v-pagination>
+        <v-pagination v-on:input="input" v-model="currentPage" :length="pagination_length" circle></v-pagination>
     </div>
 
 </v-container>
@@ -88,7 +88,7 @@ export default {
     // Using the shorthand
     layout: VuetifyLayout,
 
-    props: ["user", "items", "pagination_length"],
+    props: ["user", "items", "pagination_length", "page"],
     created() {
         this.page = this.items.current_page;
     },
@@ -99,7 +99,8 @@ export default {
             body: '',
             title: '',
             comment: '',
-            page: 1,
+            //page: 1,
+            currentPage: this.page,
             loading: false,
 
         }
@@ -115,7 +116,8 @@ export default {
     },
     methods: {
         input(page) {
-            this.goToUrl('/posts?page=' + this.page)
+            console.log(this.page)
+            this.goToUrl('/posts?page=' + this.currentPage)
         },
         goToUrl(url) {
             this.$inertia.visit(url, {

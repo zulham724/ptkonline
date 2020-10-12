@@ -22,7 +22,7 @@ class PostController extends Controller
         //return $posts;
         $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
 
-        return \Inertia\Inertia::render('Post/Index',['user'=>$user, 'items'=>$posts,'pagination_length'=>ceil($posts_count/$itemsPerPage)]);
+        return \Inertia\Inertia::render('Post/Index',['page'=>$posts->currentPage(),'user'=>$user, 'items'=>$posts,'pagination_length'=>ceil($posts_count/$itemsPerPage)]);
     }
 
     /**
