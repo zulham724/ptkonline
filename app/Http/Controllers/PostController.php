@@ -17,7 +17,7 @@ class PostController extends Controller
     {
         //return 
         $itemsPerPage=10;
-        $posts_count = Post::count();
+        $posts_count = Post::where('status','PUBLISHED')->count();
         $posts=Post::withCount('comments')->with('comments.user','user')->where('status','PUBLISHED')->orderBy('id','desc')->paginate($itemsPerPage);
         //return $posts;
         $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
@@ -96,8 +96,13 @@ class PostController extends Controller
      * @param  \App\Models\Post  $post
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Post $post)
+    public function destroy(Request $request, $post_id)
     {
-        //
+        //return $request->query('page');
+        $post=Post::where('author_id','=',auth()->user()->id)->findOrFail($post_id);
+        $post->comments()->delete();
+        $post->delete();
+        //return redirect()->route('posts.index');
+        return redirect('/posts?page='.$request->query('page'));
     }
 }

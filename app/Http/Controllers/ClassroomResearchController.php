@@ -22,7 +22,7 @@ class ClassroomResearchController extends Controller
         //return $data;
         $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
 
-        return \Inertia\Inertia::render('ClassroomResearch/Index',['user'=>$user,'items'=>$data]);
+        return \Inertia\Inertia::render('ClassroomResearch/Index',['user'=>$user,'items'=>$data,'educationalLevels'=>\App\Models\EducationalLevel::all()]);
     }
 
     /**
@@ -46,11 +46,11 @@ class ClassroomResearchController extends Controller
     {
         if($request->has('contents') && $request->has('data')){
             $classroomResearch = new ClassroomResearch;
-            $classroomResearch->year=$request->data['year'];
-            $classroomResearch->title=$request->data['title'];
-            $classroomResearch->school_name=$request->data['school_name'];
-            $classroomResearch->school_address=$request->data['school_address'];
-            $classroomResearch->educational_level_id=$request->data['educational_level'];
+            $classroomResearch->year = $request->data['year'];
+            $classroomResearch->title = $request->data['title'];
+            $classroomResearch->school_name = $request->data['school_name'];
+            $classroomResearch->school_address = $request->data['school_address'];
+            $classroomResearch->educational_level_id = $request->data['educational_level'];
             $classroomResearch = $request->user()->classroom_researches()->save($classroomResearch);
 
             foreach($request->contents as $content){
@@ -71,9 +71,11 @@ class ClassroomResearchController extends Controller
      * @param  \App\Models\ClassroomResearch  $classroomResearch
      * @return \Illuminate\Http\Response
      */
-    public function show(ClassroomResearch $classroomResearch)
+    public function show($classroomResearchId)
     {
-        //
+        $classroomResearch = ClassroomResearch::with('classroom_research_contents')->where('user_id','=',auth()->user()->id)->findOrFail($classroomResearchId);
+        return $classroomResearch;
+
     }
 
     /**
@@ -82,9 +84,11 @@ class ClassroomResearchController extends Controller
      * @param  \App\Models\ClassroomResearch  $classroomResearch
      * @return \Illuminate\Http\Response
      */
-    public function edit(ClassroomResearch $classroomResearch)
+    public function edit($classroomResearchId)
     {
-        //
+        $classroomResearch = ClassroomResearch::with('classroom_research_contents','educational_level')->where('user_id','=',auth()->user()->id)->findOrFail($classroomResearchId);
+
+        return $classroomResearch;
     }
 
     /**
@@ -94,9 +98,23 @@ class ClassroomResearchController extends Controller
      * @param  \App\Models\ClassroomResearch  $classroomResearch
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, ClassroomResearch $classroomResearch)
+    public function update(Request $request, $classroomResearchId)
     {
-        //
+        $classroomResearch = ClassroomResearch::where('user_id','=',auth()->user()->id)->findOrFail($classroomResearchId);
+        $classroomResearch->title = $request->title;
+        $classroomResearch->year = $request->year;
+        $classroomResearch->school_address = $request->school_address;
+        $classroomResearch->school_name = $request->school_name;
+        $classroomResearch->educational_level_id = \App\Models\EducationalLevel::findOrFail($request->educational_level_id)->id;
+        $classroomResearch->save();
+        foreach($request->classroom_research_contents as $content){
+              $content_db=\App\Models\ClassroomResearchContent::where('classroom_research_id','=',$classroomResearch->id)->findOrFail($content['id']);
+              $content_db->value = $content['value'];
+              $content_db->save();
+        }
+        //$classroomResearch->classroom_research_contents()->save
+        ProcessClassRoomResearch::dispatch($classroomResearch); 
+        return redirect()->route('classroom_researches.index');
     }
 
     /**
@@ -105,9 +123,18 @@ class ClassroomResearchController extends Controller
      * @param  \App\Models\ClassroomResearch  $classroomResearch
      * @return \Illuminate\Http\Response
      */
-    public function destroy(ClassroomResearch $classroomResearch)
+    public function destroy($classroomResearchId)
     {
-        //
+        $classroomResearch = ClassroomResearch::where('user_id','=',auth()->user()->id)->findOrFail($classroomResearchId);
+        $classroomResearch->load('classroom_research_contents');
+        foreach($classroomResearch->classroom_research_contents as $classroomResearchContent){
+            $classroomResearchContent->plagiarism()->delete();
+        }
+        $classroomResearch->delete();
+        return redirect()->route('classroom_researches.index');
+
+
+
     }
     public function getplagiarism($id){
         $res = ClassroomResearch::with('classroom_research_contents')->findOrFail($id);

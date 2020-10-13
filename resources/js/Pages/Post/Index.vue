@@ -33,10 +33,11 @@
                         <v-list-item-subtitle v-text="item.body"></v-list-item-subtitle>
                         <v-list-item-subtitle class="mt-1 text-caption" v-text="item.comments_count+' Komentar'"></v-list-item-subtitle>
                     </v-list-item-content>
-
                     <v-list-item-action>
                         <v-list-item-action-text>{{item.created_at | moment("from", "now")}}</v-list-item-action-text>
-
+                        <v-icon @click.stop="remove(item.id)" v-if="User.data.id==item.user.id" size="medium">
+                            mdi-delete
+                        </v-icon>
                     </v-list-item-action>
                 </v-list-item>
                 <v-divider />
@@ -57,7 +58,9 @@
 
                 <v-list-item-action>
                     <v-list-item-action-text>{{comment.created_at | moment("from", "now")}}</v-list-item-action-text>
-
+                    <v-icon @click.stop="removeComment(item.id, comment.id)" v-if="User.data.id==comment.user.id" size="medium">
+                        mdi-delete
+                    </v-icon>
                 </v-list-item-action>
 
             </v-list-item>
@@ -89,9 +92,10 @@ export default {
     layout: VuetifyLayout,
 
     props: ["user", "items", "pagination_length", "page"],
-    created() {
-        this.page = this.items.current_page;
+    computed: {
+        ...mapState(['User'])
     },
+
     data() {
         return {
             valid: true,
@@ -110,11 +114,67 @@ export default {
         //Welcome,
     },
     created() {
+        this.page = this.items.current_page;
         this.$store.commit('User/set', {
             data: this.user
         })
+        console.log(this.User)
     },
     methods: {
+        remove(post_id) {
+            swal.fire({
+                title: 'Konfirmasi Hapus',
+                icon: 'warning',
+                text: "Yakin hapus pertanyaan ini?",
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus',
+                showLoaderOnConfirm: true,
+                preConfirm: (login) => {
+                    return this.$inertia.delete(`/posts/${post_id}?page=${this.currentPage}`)
+                        .then(response => {
+                            console.log('cok>' + response)
+                            return response;
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(
+                                `Request failed: ${error}`
+                            )
+                        })
+                },
+                allowOutsideClick: () => !swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    swal.fire('Pertanyaan dihapus')
+                }
+            })
+        },
+        removeComment(post_id, comment_id) {
+            swal.fire({
+                title: 'Konfirmasi Hapus',
+                icon: 'warning',
+                text: "Yakin hapus komentar ini?",
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus',
+                showLoaderOnConfirm: true,
+                preConfirm: (login) => {
+                    return this.$inertia.delete(`/posts/${post_id}/comments/${comment_id}?page=${this.currentPage}`)
+                        .then(response => {
+                            console.log('cok>' + response)
+                            return response;
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(
+                                `Request failed: ${error}`
+                            )
+                        })
+                },
+                allowOutsideClick: () => !swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    swal.fire('Komentar dihapus')
+                }
+            })
+        },
         input(page) {
             console.log(this.page)
             this.goToUrl('/posts?page=' + this.currentPage)

@@ -71,7 +71,9 @@ export default {
         ...mapState(['ClassroomResearch'])
     },
     created() {
-
+        this.$store.commit('User/set', {
+            data: this.user
+        });
         if (this.ClassroomResearch.data) {
             this.build = {
                 ...this.ClassroomResearch.data
@@ -125,11 +127,6 @@ export default {
         VuetifyLayout,
 
         //Welcome,
-    },
-    created() {
-        this.$store.commit('User/set', {
-            data: this.user
-        })
     },
     methods: {
         submit() {
