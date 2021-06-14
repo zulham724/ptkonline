@@ -10,9 +10,9 @@
                     <v-chip @click="showPlagiarism(item)">{{item.plagiarism_score}}</v-chip>
                 </template>
                 <template v-slot:item.action="{ item }">
-                    <!--<v-icon small class="mr-2" @click="editContent(item.id)">
+                    <v-icon small class="mr-2" @click="editContent(item.id)">
                         mdi-pencil
-                    </v-icon>-->
+                    </v-icon>
                     <v-icon small @click="remove(item.id)">
                         mdi-delete
                     </v-icon>

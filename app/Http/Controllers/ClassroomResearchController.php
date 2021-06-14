@@ -15,7 +15,7 @@ class ClassroomResearchController extends Controller
      */
     public function index()
     {
-        $data=ClassroomResearch::with('educational_level','classroom_research_contents')->where('user_id',auth()->user()->id)->get();
+        $data = ClassroomResearch::with('educational_level','classroom_research_contents')->where('user_id',auth()->user()->id)->get();
         foreach($data as $classroomResearch){
             $classroomResearch->plagiarism_score = round($classroomResearch->classroom_research_contents->avg('plagiarism_score'), 2).'%';
             $classroomResearch->isShow = false;

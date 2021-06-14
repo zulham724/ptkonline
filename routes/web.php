@@ -32,9 +32,11 @@ Route::get('/', function () {
     return redirect('dashboard');
 });
 
-// Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
-//     return Inertia\Inertia::render('Home',['title'=>'Selamat Datang di Dashboard Penelitian Tindakan Kelas Guru','image_path'=>asset('storage/images/')]);
-// })->name('dashboard');
+
+
+Route::middleware(['auth:sanctum', 'verified'])->get('/profile', function () {
+    return Inertia\Inertia::render('Dashboard');
+})->name('profile.dashboard');
 
 // Route::middleware(['auth:sanctum', 'verified'])->get('/pretest', 'PretestController@index')->name('pretest.index');
 

@@ -1,59 +1,60 @@
 <template>
-    <app-layout>
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Profile
-            </h2>
-        </template>
+    <div>
+      
+        <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
+            <update-profile-information-form
+                :name="$page.user.name"
+                :email="$page.user.email"
+            />
 
-        <div>
-            <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
-                <update-profile-information-form
-                            :name="$page.user.name"
-                            :email="$page.user.email" />
+            <jet-section-border />
 
-                <jet-section-border />
+            <update-password-form class="mt-10 sm:mt-0" />
 
-                <update-password-form class="mt-10 sm:mt-0" />
-
-                <div v-if="$page.jetstream.canManageTwoFactorAuthentication">
+            <!-- <div v-if="$page.jetstream.canManageTwoFactorAuthentication">
                     <jet-section-border />
 
                     <two-factor-authentication-form class="mt-10 sm:mt-0" />
-                </div>
+                </div> -->
 
-                <jet-section-border />
+            <jet-section-border />
 
-                <logout-other-browser-sessions-form :sessions="sessions" class="mt-10 sm:mt-0" />
+            <!-- <logout-other-browser-sessions-form :sessions="sessions" class="mt-10 sm:mt-0" /> -->
 
-                <jet-section-border />
+            <jet-section-border />
 
-                <delete-user-form class="mt-10 sm:mt-0" />
-            </div>
+            <!-- <delete-user-form class="mt-10 sm:mt-0" /> -->
         </div>
-    </app-layout>
+    </div>
 </template>
 
 <script>
-    import AppLayout from './../../Layouts/AppLayout'
-    import DeleteUserForm from './DeleteUserForm'
-    import JetSectionBorder from './../../Jetstream/SectionBorder'
-    import LogoutOtherBrowserSessionsForm from './LogoutOtherBrowserSessionsForm'
-    import TwoFactorAuthenticationForm from './TwoFactorAuthenticationForm'
-    import UpdatePasswordForm from './UpdatePasswordForm'
-    import UpdateProfileInformationForm from './UpdateProfileInformationForm'
+import VuetifyLayout from "./../../Layouts/VuetifyLayout";
 
-    export default {
-        props: ['sessions'],
+import AppLayout from "./../../Layouts/AppLayout";
+import DeleteUserForm from "./DeleteUserForm";
+import JetSectionBorder from "./../../Jetstream/SectionBorder";
+import LogoutOtherBrowserSessionsForm from "./LogoutOtherBrowserSessionsForm";
+import TwoFactorAuthenticationForm from "./TwoFactorAuthenticationForm";
+import UpdatePasswordForm from "./UpdatePasswordForm";
+import UpdateProfileInformationForm from "./UpdateProfileInformationForm";
 
-        components: {
-            AppLayout,
-            DeleteUserForm,
-            JetSectionBorder,
-            LogoutOtherBrowserSessionsForm,
-            TwoFactorAuthenticationForm,
-            UpdatePasswordForm,
-            UpdateProfileInformationForm,
-        },
+export default {
+    // Using a render function
+    layout: (h, page) => h(VuetifyLayout, [page]),
+
+    // Using the shorthand
+    layout: VuetifyLayout,
+    props: ["sessions"],
+
+    components: {
+        AppLayout,
+        DeleteUserForm,
+        JetSectionBorder,
+        LogoutOtherBrowserSessionsForm,
+        TwoFactorAuthenticationForm,
+        UpdatePasswordForm,
+        UpdateProfileInformationForm
     }
+};
 </script>
