@@ -2,6 +2,9 @@
 <v-container fluid>
     <v-row class="justify-center">
         <v-col>
+             <div class="d-flex justify-end">
+                <v-btn class="mt-2" color="primary" @click="goToUrl('classroom_researches/create')">Buat Proposal PTK</v-btn>
+            </div>
             <v-data-table :headers="headers" :items="items" class="elevation-1">
                 <template v-slot:item.plagiarism_score="{item}">
                     <v-chip @click="showPlagiarism(item)">{{item.plagiarism_score}}</v-chip>
@@ -15,9 +18,6 @@
                     </v-icon>
                 </template>
             </v-data-table>
-            <div class="d-flex justify-end">
-                <v-btn class="mt-2" color="primary" @click="goToUrl('classroom_researches/create')">Buat Proposal PTK</v-btn>
-            </div>
         </v-col>
 
         <v-dialog v-model="dialog" fullscreen hide-overlay transition="dialog-bottom-transition">

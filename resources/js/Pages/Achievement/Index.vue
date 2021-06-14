@@ -8,7 +8,8 @@
                 <v-data-table :headers="pretest_headers" :items="items.pretest_campaigns">
 
                     <template v-slot:item.created_at="{item}">
-                        {{new Date(item.created_at).toLocaleString('id-ID', { timeZone: 'UTC' })}}
+                        {{item.created_at | moment("dddd, DD MMMM YYYY")}}
+                        <!-- {{new Date(item.created_at).toLocaleString('id-ID', { timeZone: 'UTC' })}} -->
                     </template>
                     <template v-slot:item.value="{item}">
                         <v-chip v-if="item.value===null">
@@ -27,7 +28,8 @@
             <v-card outlined>
                 <v-data-table :headers="posttest_headers" :items="items.posttest_campaigns">
                     <template v-slot:item.created_at="{item}">
-                        {{new Date(item.created_at).toLocaleString('id-ID', { timeZone: 'UTC' })}}
+                        {{item.created_at | moment("dddd, DD MMMM YYYY")}}
+                        <!-- {{new Date(item.created_at).toLocaleString('id-ID', { timeZone: 'UTC' })}} -->
                     </template>
                     <template v-slot:item.value="{item}">
                         <v-chip v-if="item.value===null">

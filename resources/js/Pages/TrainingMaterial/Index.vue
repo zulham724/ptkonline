@@ -4,7 +4,7 @@
         <v-col v-for="(item, n) in items" :key="n" lg="3">
             <v-card click="">
                 <v-card-title>{{item.name}}</v-card-title>
-                <v-card-subtitle>{{item.created_at | moment("dddd, DD MMMM YYYY")}}</v-card-subtitle>
+                <!-- <v-card-subtitle>{{item.created_at | moment("dddd, DD MMMM YYYY")}}</v-card-subtitle> -->
                 <v-card-text>
                     {{item.description}}
                 </v-card-text>

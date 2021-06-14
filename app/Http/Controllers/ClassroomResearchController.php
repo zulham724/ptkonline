@@ -18,6 +18,7 @@ class ClassroomResearchController extends Controller
         $data=ClassroomResearch::with('educational_level','classroom_research_contents')->where('user_id',auth()->user()->id)->get();
         foreach($data as $classroomResearch){
             $classroomResearch->plagiarism_score = round($classroomResearch->classroom_research_contents->avg('plagiarism_score'), 2).'%';
+            $classroomResearch->isShow = false;
         }
         //return $data;
         $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
@@ -59,9 +60,9 @@ class ClassroomResearchController extends Controller
                 $classroomResearchContent->value = isset($content['html'])?$content['html']:null;
                 $classroomResearch->classroom_research_contents()->save($classroomResearchContent);
             }
-            ProcessClassRoomResearch::dispatch($classroomResearch); 
+            ProcessClassRoomResearch::dispatch($classroomResearch);
             return redirect()->route('classroom_researches.index');
-            
+
         }
     }
 
@@ -113,7 +114,7 @@ class ClassroomResearchController extends Controller
               $content_db->save();
         }
         //$classroomResearch->classroom_research_contents()->save
-        ProcessClassRoomResearch::dispatch($classroomResearch); 
+        ProcessClassRoomResearch::dispatch($classroomResearch);
         return redirect()->route('classroom_researches.index');
     }
 
