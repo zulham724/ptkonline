@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Posttest;
 use Illuminate\Http\Request;
+use DB;
 
 class PosttestController extends Controller
 {
@@ -14,12 +15,20 @@ class PosttestController extends Controller
      */
     public function index()
     {
+        $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
+        
+        $posttest_campaigns = DB::table('campaigns as c')->where('c.user_id',$user->id)
+        ->join('pretests as p','p.id','=','c.campaign_id')
+        ->where('c.campaign_type','App\Models\Posttest')
+        ->where('c.is_publish',true)
+        ->orderBy('c.id','desc')->get();
+
         $posttest = Posttest::withCount('question_lists')->whereDoesntHave('campaigns',function($query){
             $query->where('campaigns.user_id','=',auth()->user()->id);
         })->get();
-        $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
+        // $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
 
-        return \Inertia\Inertia::render('Posttest/Index',['user'=>$user, 'items'=>$posttest]);
+        return \Inertia\Inertia::render('Posttest/Index',['user'=>$user, 'items'=>$posttest, 'posttest_campaigns'=>$posttest_campaigns]);
     }
 
     /**
@@ -103,6 +112,9 @@ class PosttestController extends Controller
             $item->answer=null;
             return $item;
         });
+        $shuffled = $pretest->question_lists->shuffle();
+        unset($pretest->question_lists);
+        $posttest->question_lists =  $shuffled->all();
         //return $pretest;
         return \Inertia\Inertia::render('Posttest/Show',['data'=>$posttest]);
     }

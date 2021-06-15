@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClassroomResearch;
+use App\Models\ClassroomResearchFormat;
 use App\Models\ClassroomResearchContent;
 use Illuminate\Http\Request;
 use App\Jobs\ProcessClassRoomResearch;
@@ -13,12 +14,30 @@ class ClassroomResearchController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+   
     public function index()
     {
-        $data = ClassroomResearch::with('educational_level','classroom_research_contents')->where('user_id',auth()->user()->id)->get();
+        $formatTotal = ClassroomResearchFormat::selectRaw('educational_level_id, count(1) as format_total')->groupBy('educational_level_id');
+        $data = ClassroomResearch::selectRaw('classroom_researches.*,format_total.format_total')->with('educational_level','classroom_research_contents')->where('user_id',auth()->user()->id)
+        ->joinSub($formatTotal, 'format_total', function($join){
+            $join->on('classroom_researches.educational_level_id','=','format_total.educational_level_id');
+        })
+        ->orderBy('id','desc')->get();
         foreach($data as $classroomResearch){
             $classroomResearch->plagiarism_score = round($classroomResearch->classroom_research_contents->avg('plagiarism_score'), 2).'%';
             $classroomResearch->isShow = false;
+            $status = 1; //1 completed, 0 draft/belum completed, -1 invalid
+            if(count($classroomResearch->classroom_research_contents)!=$classroomResearch->format_total)$status=-1;
+            else{
+                // mengecek jika adalah salah satu konten yg kosong
+                foreach($classroomResearch->classroom_research_contents as $content){
+                    if(empty(trim($content->value))){
+                        $status = 0;
+                        break;
+                    }
+                }
+            }
+            $classroomResearch->status = $status;
         }
         //return $data;
         $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
@@ -135,6 +154,14 @@ class ClassroomResearchController extends Controller
         return redirect()->route('classroom_researches.index');
 
 
+
+    }
+    public function download($id){
+        $data = ClassroomResearch::with('user','classroom_research_contents')->findOrFail($id);
+        // return $data;
+        $pdf = \PDF::loadView('pages.classroomresearch.preview', $data);
+        $download = $pdf->stream($data->name.' '.auth()->user()->name);
+        return $download;
 
     }
     public function getplagiarism($id){

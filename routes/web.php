@@ -8,6 +8,9 @@ use App\Http\Controllers\Admin\TrainingMaterialAdminController;
 use App\Http\Controllers\Admin\UserAdminController;
 use App\Http\Controllers\Admin\PosttestCampaignAdminController;
 use App\Http\Controllers\Admin\PretestCampaignAdminController;
+use App\Http\Controllers\Admin\ClassroomResearchAdminController;
+use App\Http\Controllers\Admin\ClassroomResearchCommentAdminController;
+
 
 use App\Http\Controllers\PosttestController;
 use App\Http\Controllers\ClassroomResearchController;
@@ -61,7 +64,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function(){
     Route::get('educational_level/{id}/classroom_research_format',[ClassroomResearchFormatController::class,'getByEducatioanlLevel']);
 
     Route::get('classroom_research_plagiarism/{id}', [ClassroomResearchController::class, 'getplagiarism']);
-    
+    Route::get('/classroom_research/{id}/download', [ClassroomResearchController::class,'download']);
 
 });
 
@@ -71,7 +74,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function(){
 // })->name('dashboard');
 
 Route::get('/test', function(){
-   return auth()->user()->load('profile.educational_level','pretest_campaigns.campaign','posttest_campaigns.campaign');
+    return menu('admin');
 
 })->middleware('auth:sanctum');
 
@@ -90,6 +93,10 @@ Route::group(['prefix' => 'admin'], function () {
         Route::get('custom_training_material_contents/{training_material_id?}',function($training_material_id=null){
             return view('custom_training_material_contents',['training_material_id'=>$training_material_id]);
         })->name('custom_training_material_contents.index');
+
+
+        Route::get('list_ptk/{user_id?}',[ClassroomResearchAdminController::class, 'list_ptk'])->name('voyager.list_ptk.index');
+
 
         Route::get('getpretests',function(){
             return \App\Models\Pretest::all(); 
@@ -137,6 +144,12 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('pretest/campaign/{campaign_id}',[PretestCampaignAdminController::class, 'updateByCampaign']);
         Route::post('posttest/campaign/{campaign_id}',[PosttestCampaignAdminController::class, 'updateByCampaign']);
         //Route::get('posttest_assessment');
+
+        Route::group(['prefix'=>'get_json'], function(){
+            Route::post('/getclassroomresearches', [ClassroomResearchAdminController::class, 'getclassroomresearches']);
+            Route::post('/submitcomments/{classroom_research_id}', [ClassroomResearchCommentAdminController::class, 'submitcomments']);
+        });
+
     });
    
 });

@@ -2,10 +2,14 @@
 <v-container fluid>
     <v-row class="justify-center">
         <v-col>
-             <div class="d-flex justify-end">
+             <div class="d-flex justify-between">
+                 <v-switch
+      v-model="switch1"
+      label="Tampilkan draft saja"
+    ></v-switch>
                 <v-btn class="mt-2" color="primary" @click="goToUrl('classroom_researches/create')">Buat Proposal PTK</v-btn>
             </div>
-            <v-data-table :headers="headers" :items="items" class="elevation-1">
+            <v-data-table :headers="headers" :items="filteredItems" class="elevation-1">
                 <template v-slot:item.plagiarism_score="{item}">
                     <v-chip @click="showPlagiarism(item)">{{item.plagiarism_score}}</v-chip>
                 </template>
@@ -16,6 +20,14 @@
                     <v-icon small @click="remove(item.id)">
                         mdi-delete
                     </v-icon>
+                     <v-icon small @click="print(item.id)">
+                        mdi-printer
+                    </v-icon>
+                </template>
+                <template v-slot:item.status="{ item }">
+                    <span v-if="item.status==1">Completed</span>
+                    <span v-else-if="item.status==0">Draft</span>
+                    <span v-else>Invalid</span>
                 </template>
             </v-data-table>
         </v-col>
@@ -156,9 +168,16 @@ export default {
             return this.items2.length ? (total / this.items2.length).toFixed(2) + '%' : '-';
 
         },
+        filteredItems(){
+            if(!this.switch1)return this.items;
+            else{
+                return this.items.filter(e=>e.status==0);
+            }
+        }
     },
     data() {
         return {
+            switch1:false,
             valid: true,
             dialog: false,
             editDialog: false,
@@ -212,6 +231,10 @@ export default {
                     text: 'Tingkat plagiarism',
                     value: 'plagiarism_score'
                 },
+                 {
+                    text: 'Status',
+                    value: 'status'
+                },
                 {
                     text: 'Aksi',
                     value: 'action'
@@ -244,6 +267,10 @@ export default {
 
     },
     methods: {
+        print(id){
+            window.open(`/classroom_research/${id}/download`, '_blank');
+            // this.$inertia.visit();
+        },
         submit() {
             if (!this.$refs.form.validate()) return;
             swal.fire({

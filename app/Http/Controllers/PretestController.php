@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Pretest;
 use Illuminate\Http\Request;
+use App\Models\Campain;
+use DB;
 
 class PretestController extends Controller
 {
@@ -14,13 +16,24 @@ class PretestController extends Controller
      */
     public function index()
     {
+        $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
+        
+        $pretest_campaigns = DB::table('campaigns as c')->where('c.user_id',$user->id)
+        ->join('pretests as p','p.id','=','c.campaign_id')
+        ->where('c.campaign_type','App\Models\Pretest')
+        ->where('c.is_publish',true)
+        ->orderBy('c.id','desc')->get();
+        // return $pretest_campaign;
+
+    //    return $data->get()  ;
+        // return $campaign_items;
         //return Pretest::withCount('question_lists')->get();
         $pretest = Pretest::withCount('question_lists')->whereDoesntHave('campaigns',function($query){
             $query->where('campaigns.user_id','=',auth()->user()->id);
         })->get();
         $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
 
-        return \Inertia\Inertia::render('Pretest/Index',['user'=>$user, 'items'=>$pretest]);
+        return \Inertia\Inertia::render('Pretest/Index',['user'=>$user, 'items'=>$pretest, 'pretest_campaigns'=>$pretest_campaigns]);
     }
 
     /**
@@ -130,7 +143,10 @@ class PretestController extends Controller
             if($item->question_list_type->name=='textfield')unset($item['answer_lists']);
             return $item;
         });
-        //return $pretest;
+        $shuffled = $pretest->question_lists->shuffle();
+        unset($pretest->question_lists);
+        $pretest->question_lists = $shuffled->all();
+        // return $pretest->question_lists;
   
         //return $data;
         return \Inertia\Inertia::render('Pretest/Show',['user'=>auth()->user()->load('campaigns'),'data'=>$pretest]);
