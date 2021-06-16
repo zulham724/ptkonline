@@ -1,13 +1,13 @@
 <template>
     <v-container fluid>
         <div v-if="$page.flash && $page.flash.success">
-            <v-alert type="success">{{$page.flash.success}}</v-alert>
+            <v-alert type="success">{{ $page.flash.success }}</v-alert>
         </div>
-         <div v-if="$page.flash && $page.flash.error">
-            <v-alert type="error">{{$page.flash.error}}</v-alert>
+        <div v-if="$page.flash && $page.flash.error">
+            <v-alert type="error">{{ $page.flash.error }}</v-alert>
         </div>
         <div v-if="$page.flash && $page.flash.warning">
-            <v-alert type="warning">{{$page.flash.warning}}</v-alert>
+            <v-alert type="warning">{{ $page.flash.warning }}</v-alert>
         </div>
         <div v-if="uncompleted_pretests.length">
             Ada soal yang belum selesai dikerjakan
@@ -67,9 +67,20 @@
         <v-row>
             <v-data-table
                 :headers="headers"
-                :items="pretest_campaigns"
+                :items="completed_pretests"
                 class="elevation-1"
             >
+                <template v-slot:item.value="{ item }">
+                     <v-chip v-if="item.value && item.is_submitted" color="green" dark>
+                        {{item.value}}
+                    </v-chip>
+                    <v-chip v-else-if="!item.value && item.is_submitted" color="orange" dark>
+                        Menunggu koreksi
+                    </v-chip>
+                    <v-chip v-else color="red" dark>
+                        Waktu habis
+                    </v-chip>
+                </template>
             </v-data-table>
         </v-row>
     </v-container>
@@ -86,7 +97,7 @@ export default {
     // Using the shorthand
     layout: VuetifyLayout,
 
-    props: ["user", "items", "pretest_campaigns", "uncompleted_pretests"],
+    props: ["user", "items", "uncompleted_pretests", "completed_pretests"],
 
     data() {
         return {
@@ -98,8 +109,9 @@ export default {
                     value: "id"
                 },
                 {
-                    text: "Soal Pre test",
-                    value: "name"
+                    text: "Soal",
+                    value: "campaignable.name",
+                    sortable: false
                 },
                 {
                     text: "Nilai",

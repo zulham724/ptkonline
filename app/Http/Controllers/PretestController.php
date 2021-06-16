@@ -17,6 +17,12 @@ use DB;
 
 class PretestController extends Controller
 {
+    private $timer;
+    private $minute;
+    public function __construct(){
+        $this->minute = intval(env('PRETEST_TIMER',5));
+        $this->timer = 60*$this->minute;
+    }
     // menyimpan jawaban sementara pada saat mengerjakan soal
     public function setAnswers(Request $request, $pretest_id){
         $request->validate([
@@ -91,10 +97,27 @@ class PretestController extends Controller
             $query->where('id','!=',$target_id);
         })->where(function($query){
             $query->where('is_submitted',false)->orWhereNull('is_submitted');
-        })->whereRaw('ABS(TIMESTAMPDIFF(MINUTE,campaigns.created_at,?))<8', [Carbon::now()])
+        })->whereRaw('ABS(TIMESTAMPDIFF(SECOND,campaigns.created_at,?))<=?', [Carbon::now(), $this->timer])
         ->where('user_id', $user->id)->exists();
         if($exists)return false;
         return true; 
+    }
+    public function checkIsExpired($target_id){
+        $user = auth()->user();
+        $exists = Campaign::whereHasMorph('campaignable', [Pretest::class], function(Builder $query)use($target_id){
+            $query->where('id',$target_id);
+        })->whereRaw('ABS(TIMESTAMPDIFF(SECOND,campaigns.created_at,?))<=?', [Carbon::now(), $this->timer])
+        ->where('user_id', $user->id)->exists();
+        if($exists)return false;
+        return true; 
+    }
+    private function getNotExpiredPretestCampaignQuery($pretest_id){
+        $user = auth()->user();
+        $query = Campaign::whereHasMorph('campaignable', [Pretest::class],  function (Builder $query)use($pretest_id, $user) {
+            $query->where('pretests.id', $pretest_id)
+            ->whereRaw('ABS(TIMESTAMPDIFF(SECOND,campaigns.created_at,?))<=?', [Carbon::now(), $this->timer]);
+        })->where('user_id', $user->id);
+        return $query;
     }
     public function beginTest(Request $request, $pretest_id){
 
@@ -102,6 +125,7 @@ class PretestController extends Controller
             $request->session()->flash('warning', 'Ada soal lain yang masih dikerjakan');
             return redirect()->route('pretests.index');
         }
+        
         // BEGIN preprocessing pretest
         $pretest = Pretest::findOrFail($pretest_id);
         $user = auth()->user();
@@ -122,6 +146,12 @@ class PretestController extends Controller
 
         // jika campaign dgn $pretest_id sudah ada, maka load data dgn answer yg sudah ada
         if($campaign){
+            //check jika campaign expired
+            if(!$this->getNotExpiredPretestCampaignQuery($pretest->id)->exists()){
+                $request->session()->flash('warning', 'Waktu telah habis!');
+                return redirect()->route('pretests.index'); 
+            }
+
             // menampung db question_lists ke array dgn key berupa ID
             $db_question_lists = [];
             foreach($pretest->question_lists as $question_list){
@@ -152,7 +182,7 @@ class PretestController extends Controller
             }
             // return $pretest;
 
-            return \Inertia\Inertia::render('Pretest/Show',['user'=>auth()->user()->load('campaigns'),'data'=>$pretest]);
+            // return \Inertia\Inertia::render('Pretest/Show',['user'=>auth()->user()->load('campaigns'),'data'=>$pretest, 'campaign'=>$campaign]);
 
         }else{
  
@@ -177,15 +207,23 @@ class PretestController extends Controller
                 DB::table('questions')->insert($questions);
 
                 DB::commit();
-                return \Inertia\Inertia::render('Pretest/Show',['user'=>auth()->user()->load('campaigns'),'data'=>$pretest]);
+                // return \Inertia\Inertia::render('Pretest/Show',['user'=>auth()->user()->load('campaigns'),'data'=>$pretest, 'campaign'=>$campaign]);
             }catch (\PDOException $e) {
                 // Woopsy
                 DB::rollBack();
                 dd($e);
             }
-           
+ 
     
         }
+
+        $end_at = $campaign->created_at->addMinutes($this->minute);
+        $campaign->end_at = $end_at->toDateTimeString();
+        $campaign->start_at = $campaign->created_at->toDateTimeString();
+        $campaign->end_at_timestamp = $end_at->timestamp;
+        $campaign->start_at_timestamp = $campaign->created_at->timestamp;
+       
+        return \Inertia\Inertia::render('Pretest/Show',['user'=>auth()->user()->load('campaigns'),'data'=>$pretest, 'campaign'=>$campaign]);
 
         
         
@@ -199,11 +237,11 @@ class PretestController extends Controller
     {
         $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
         
-        $pretest_campaigns = DB::table('campaigns as c')->where('c.user_id',$user->id)
-        ->join('pretests as p','p.id','=','c.campaign_id')
-        ->where('c.campaign_type','App\Models\Pretest')
-        ->where('c.is_publish',true)
-        ->orderBy('c.id','desc')->get();
+        // $pretest_campaigns = DB::table('campaigns as c')->where('c.user_id',$user->id)
+        // ->join('pretests as p','p.id','=','c.campaign_id')
+        // ->where('c.campaign_type','App\Models\Pretest')
+        // ->where('c.is_publish',true)
+        // ->orderBy('c.id','desc')->get();
         // return $pretest_campaign;
 
     //    return $data->get()  ;
@@ -217,13 +255,16 @@ class PretestController extends Controller
         $uncompleted_pretests =  Pretest::withCount('question_lists')->whereHas('campaigns',function($query){
             $query->where('campaigns.user_id','=',auth()->user()->id)->where(function($query2){
                 $query2->where('is_submitted',false)->orWhereNull('is_submitted')
-                ->whereRaw('ABS(TIMESTAMPDIFF(MINUTE,campaigns.created_at,?))<8', [Carbon::now()]);
+                ->whereRaw('ABS(TIMESTAMPDIFF(SECOND,campaigns.created_at,?))<=?', [Carbon::now(), $this->timer]);
             });
         })->get();
 
-        
-
-        return \Inertia\Inertia::render('Pretest/Index',['user'=>$user, 'uncompleted_pretests'=>$uncompleted_pretests, 'items'=>$pretests, 'pretest_campaigns'=>$pretest_campaigns]);
+        // completed jika is_submitted=true dan selisih now() dan campaign.created_at > $this->timer
+        $completed_pretests = Campaign::with('campaignable')->whereHasMorph('campaignable', [Pretest::class], function(Builder $query){
+            $query->where('is_submitted',true)->orWhereRaw('ABS(TIMESTAMPDIFF(SECOND,campaigns.created_at,?))>?', [Carbon::now(), $this->timer]);
+        })->get();
+        // return $
+        return \Inertia\Inertia::render('Pretest/Index',['completed_pretests'=>$completed_pretests, 'user'=>$user, 'uncompleted_pretests'=>$uncompleted_pretests, 'items'=>$pretests]);
     }
 
     /**
@@ -258,8 +299,15 @@ class PretestController extends Controller
         $request->validate([
             'question_lists'=>'array',
             'question_lists.*.id'=>'required',
-            'question_lists.*.answer'=>'required',
+            // 'question_lists.*.answer'=>'required', jgn di required karena saat forceSubmit, answer boleh null
         ]);
+        // inisialisasi
+        foreach($request->question_lists as $question_list){
+            if(!$question_list['answer']){
+                $question_list['answer'] = null;
+            }
+        }
+
         $user = $request->user();
         $pretest = Pretest::findOrFail($request->id);
         // cek apakah ada campaign dgn pretest_id sekain dan user auth
@@ -268,12 +316,13 @@ class PretestController extends Controller
         })->where('user_id', $user->id)->first();
 
         if($campaign){
-            // return $campaign->created_at;
-            $begin = $campaign->created_at;
-            $end = Carbon::now();
-            $diff = $begin->diffInMinutes($end);
-            // jika lebih besar dri 7 menit, maka jgn simpan
-            if($diff>7){
+            // PENTING: ditambah 30 detik karena latency internet
+            $begin = $campaign->created_at->addSeconds(30);
+            
+            $end = Carbon::now(); 
+            $diff = $begin->diffInSeconds($end);
+            // jika lebih besar dri $this->timer detik, maka jgn simpan
+            if($diff>$this->timer){
                 $request->session()->flash('error', 'Waktu telah habis!');
                 return redirect()->route('pretests.index');
             }
@@ -369,7 +418,16 @@ class PretestController extends Controller
 
                     if($question_list_type->name=="selectoptions"){
                         $selectoptions_count++; 
-                        $score = $db_question_list->arr_answer_lists[$request_question_list['answer']]['score']; //jika pilihan ganda, score'nya antara 100 (benar) atau null (salah)
+
+                        //jika pilihan ganda, score'nya antara 100 (benar) atau 0 (salah)
+                        if($request_question_list['answer']){
+                            $request_answer = $db_question_list->arr_answer_lists[$request_question_list['answer']];
+                            $score = $request_answer?$request_answer['score']:0;
+                        }else{
+                            $score = 0;
+                        }
+                       
+
                         $score_total+=$score;
 
                         $selected_answer_list_id = $request_question_list['answer']; //answer adalah answer_list_id yg dipilih user
@@ -379,7 +437,7 @@ class PretestController extends Controller
                         $textfield_count++;
                         $score = null; //jika uraian maka harus koreksi manual
                         $selected_answer_list_id = null; //jika uraian maka tidak perlu answer_list_id
-                        $value = $request_question_list->answer; //answer adalah kalimat jawaban dri user
+                        $value = $request_question_list['answer']; //answer adalah kalimat jawaban dri user
                     }
                     Answer::updateOrCreate([
                         'question_id'=>$question->id,

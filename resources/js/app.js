@@ -12,6 +12,7 @@ import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import { InertiaProgress } from '@inertiajs/progress'
 import store from './store';
+import VueCountdownTimer from 'vuejs-countdown-timer';
 
 InertiaProgress.init({
     // The delay after which the progress bar will
@@ -41,6 +42,8 @@ Vue.use(InertiaForm);
 Vue.use(PortalVue);
 Vue.use(Vuetify);
 Vue.use(Vue2Editor);
+Vue.use(VueCountdownTimer);
+
 Vue.component('pretest-question-list',require("./components/admin/PretestQuestionList.vue").default);
 
 const moment = require('moment')
