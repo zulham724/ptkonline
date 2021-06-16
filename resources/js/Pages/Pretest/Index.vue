@@ -1,16 +1,38 @@
 <template>
     <v-container fluid>
+        <div v-if="$page.flash && $page.flash.success">
+            <v-alert type="success">{{$page.flash.success}}</v-alert>
+        </div>
+         <div v-if="$page.flash && $page.flash.error">
+            <v-alert type="error">{{$page.flash.error}}</v-alert>
+        </div>
+        <div v-if="$page.flash && $page.flash.warning">
+            <v-alert type="warning">{{$page.flash.warning}}</v-alert>
+        </div>
         <div v-if="uncompleted_pretests.length">
             Ada soal yang belum selesai dikerjakan
 
-            <v-row 
+            <v-row
                 class=""
                 v-for="uncompleted_pretest in uncompleted_pretests"
                 :key="uncompleted_pretest.id"
             >
                 <v-col>
-                    <span class=" text-subtitle-2">{{ uncompleted_pretest.name }} </span><span class="text-caption">{{'('+uncompleted_pretest.question_lists_count+' Soal)'}}</span>
-                    <v-btn small color="info" @click="goToUrl(`/beginpretest/${uncompleted_pretest.id}`)">Kerjakan</v-btn>
+                    <span class=" text-subtitle-2"
+                        >{{ uncompleted_pretest.name }} </span
+                    ><span class="text-caption">{{
+                        "(" +
+                            uncompleted_pretest.question_lists_count +
+                            " Soal)"
+                    }}</span>
+                    <v-btn
+                        small
+                        color="info"
+                        @click="
+                            goToUrl(`/beginpretest/${uncompleted_pretest.id}`)
+                        "
+                        >Kerjakan</v-btn
+                    >
                 </v-col>
             </v-row>
 

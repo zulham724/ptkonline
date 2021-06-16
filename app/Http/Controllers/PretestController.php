@@ -84,8 +84,24 @@ class PretestController extends Controller
     
       
     }
-    public function beginTest($pretest_id){
+    // cek apakah ada campaign dgn  yg is_submitted=false tpi belum expired
+    public function checkIsCampaignable($target_id){
+        $user = auth()->user();
+        $exists = Campaign::whereHasMorph('campaignable', [Pretest::class], function(Builder $query)use($target_id){
+            $query->where('id','!=',$target_id);
+        })->where(function($query){
+            $query->where('is_submitted',false)->orWhereNull('is_submitted');
+        })->whereRaw('ABS(TIMESTAMPDIFF(MINUTE,campaigns.created_at,?))<8', [Carbon::now()])
+        ->where('user_id', $user->id)->exists();
+        if($exists)return false;
+        return true; 
+    }
+    public function beginTest(Request $request, $pretest_id){
 
+        if(!$this->checkIsCampaignable($pretest_id)){
+            $request->session()->flash('warning', 'Ada soal lain yang masih dikerjakan');
+            return redirect()->route('pretests.index');
+        }
         // BEGIN preprocessing pretest
         $pretest = Pretest::findOrFail($pretest_id);
         $user = auth()->user();
@@ -120,10 +136,10 @@ class PretestController extends Controller
 
                 if($new_question_lists[$question->id]->question_list_type->name=="textfield"){
                     
-                    $new_question_lists[$question->id]->answer = $question->answer->value;
+                    $new_question_lists[$question->id]->answer = $question->answer?$question->answer->value:null;
                 }else{
                     // jika piliha ganda, answer adalah answer_list_id 
-                    $new_question_lists[$question->id]->answer = $question->answer->answer_list_id;
+                    $new_question_lists[$question->id]->answer = $question->answer?$question->answer->answer_list_id:null;
                 }
 
             }
@@ -205,7 +221,7 @@ class PretestController extends Controller
             });
         })->get();
 
-        // $request->session()->flash('status', 'Task was successful!');
+        
 
         return \Inertia\Inertia::render('Pretest/Index',['user'=>$user, 'uncompleted_pretests'=>$uncompleted_pretests, 'items'=>$pretests, 'pretest_campaigns'=>$pretest_campaigns]);
     }
@@ -258,10 +274,13 @@ class PretestController extends Controller
             $diff = $begin->diffInMinutes($end);
             // jika lebih besar dri 7 menit, maka jgn simpan
             if($diff>7){
-               return response('<h1>Waktu Habis</h1>', 403);
+                $request->session()->flash('error', 'Waktu telah habis!');
+                return redirect()->route('pretests.index');
             }
             if($campaign->is_submitted){
-                return response('<h2>Anda sudah mengerjakan soal ini</h2>', 403);
+                $request->session()->flash('warning', 'Anda sudah mengerjakan soal ini');
+                return redirect()->route('pretests.index');
+
             }
             try {
                 $pretest->load('question_lists.question_list_type','question_lists.answer_lists');
@@ -384,12 +403,12 @@ class PretestController extends Controller
 
         }
       
-        return 'cok';
+        // return 'cok';
         // if($campaign)
         //return $request;
         
         
-        
+        $request->session()->flash('success', 'Selamat, soal berhasil disubmit');  
         return redirect()->route('pretests.index');
     }
 
