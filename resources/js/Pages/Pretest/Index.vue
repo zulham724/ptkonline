@@ -1,5 +1,22 @@
 <template>
     <v-container fluid>
+        <div v-if="uncompleted_pretests.length">
+            Ada soal yang belum selesai dikerjakan
+
+            <v-row 
+                class=""
+                v-for="uncompleted_pretest in uncompleted_pretests"
+                :key="uncompleted_pretest.id"
+            >
+                <v-col>
+                    <span class=" text-subtitle-2">{{ uncompleted_pretest.name }} </span><span class="text-caption">{{'('+uncompleted_pretest.question_lists_count+' Soal)'}}</span>
+                    <v-btn small color="info" @click="goToUrl(`/beginpretest/${uncompleted_pretest.id}`)">Kerjakan</v-btn>
+                </v-col>
+            </v-row>
+
+            <v-divider></v-divider>
+        </div>
+
         <v-row align="center">
             <v-col class="d-flex" cols="12" sm="6">
                 <v-select
@@ -28,7 +45,7 @@
         <v-row>
             <v-data-table
                 :headers="headers"
-                :items="pretest_campaign"
+                :items="pretest_campaigns"
                 class="elevation-1"
             >
             </v-data-table>
@@ -47,7 +64,7 @@ export default {
     // Using the shorthand
     layout: VuetifyLayout,
 
-    props: ["user", "items", "pretest_campaigns"],
+    props: ["user", "items", "pretest_campaigns", "uncompleted_pretests"],
 
     data() {
         return {
@@ -82,20 +99,28 @@ export default {
         });
     },
     methods: {
+        test() {
+            this.$inertia.post(url);
+        },
         goToUrl(url) {
-            this.$inertia.visit(url, {
-                method: "get",
-                data: {},
-                replace: false,
-                preserveState: false,
-                preserveScroll: false,
-                only: [],
-                headers: {}
-            });
+            this.$inertia.post(url);
         },
         beginTest() {
-            //console.log(this.model)
-            this.goToUrl("/pretests/" + this.model);
+            swal.fire({
+                title: "Konfirmasi",
+                text:
+                    "Kerjakan soal ini? Anda akan diberi waktu 5 menit untuk mengerjakan soal pretest ini",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Ya, kerjakan",
+                reverseButtons: true
+            }).then(result => {
+                if (result.isConfirmed) {
+                    this.goToUrl("/beginpretest/" + this.model);
+                }
+            });
         }
     }
 };

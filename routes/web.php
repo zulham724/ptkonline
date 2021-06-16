@@ -50,6 +50,9 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function(){
         return Inertia\Inertia::render('Home',['user'=>$user,'title'=>'Selamat Datang di Dashboard Penelitian Tindakan Kelas Guru','image_path'=>asset('storage/images/')]);
     })->name('dashboard');
 
+    Route::post('/beginpretest/{pretest_id}', [PretestController::class, 'beginTest']);
+    Route::post('/pretest/{pretest_id}/setanswers', [PretestController::class, 'setAnswers']);
+    
     Route::resource('pretests', PretestController::class);
     Route::resource('posttests', PosttestController::class);
     Route::resource('classroom_researches', ClassroomResearchController::class);

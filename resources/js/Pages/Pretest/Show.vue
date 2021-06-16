@@ -89,7 +89,7 @@ export default {
     watch: {
         "data.question_lists": {
             handler: _.debounce(function(val, oldVal) {
-                //console.log(val)
+                console.log('watch data.question_lists', this.data)
                 this.$store.commit("Pretest/set", {
                     pretest: {
                         id: this.data.id,
@@ -97,6 +97,7 @@ export default {
                     },
                     question_lists: val
                 });
+                this.$store.dispatch("Pretest/setAnswers", this.data);
             }, 500),
             deep: true
         }

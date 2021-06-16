@@ -1,6 +1,8 @@
 require('./bootstrap');
-
+// var _ = require('lodash');
 import Vue from 'vue';
+// Vue.prototype.$axios = require('axios').default;
+
 import '@mdi/font/css/materialdesignicons.css' // Ensure you are using css-loader
 
 import { InertiaApp } from '@inertiajs/inertia-vue';

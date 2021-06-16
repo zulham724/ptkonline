@@ -15,5 +15,6 @@ class Question extends Model
     public function question_list(){
         return $this->belongsTo('App\Models\QuestionList');
     }
+    protected $guarded = [];
  
 }

@@ -18,7 +18,7 @@ class ClassroomResearchController extends Controller
     public function index()
     {
         $formatTotal = ClassroomResearchFormat::selectRaw('educational_level_id, count(1) as format_total')->groupBy('educational_level_id');
-        $data = ClassroomResearch::selectRaw('classroom_researches.*,format_total.format_total')->with('educational_level','classroom_research_contents')->where('user_id',auth()->user()->id)
+        $data = ClassroomResearch::with('educational_level','classroom_research_contents','classroom_research_comments')->selectRaw('classroom_researches.*,format_total.format_total')->where('user_id',auth()->user()->id)
         ->joinSub($formatTotal, 'format_total', function($join){
             $join->on('classroom_researches.educational_level_id','=','format_total.educational_level_id');
         })
