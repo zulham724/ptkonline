@@ -77,7 +77,9 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function(){
 // })->name('dashboard');
 
 Route::get('/test', function(){
-    return menu('admin');
+    $first = Carbon\Carbon::create('2020-09-28 03:54:56');
+    $second = Carbon\Carbon::now();
+    return $first->diffInMinutes($second);
 
 })->middleware('auth:sanctum');
 

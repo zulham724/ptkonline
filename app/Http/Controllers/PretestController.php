@@ -7,7 +7,13 @@ use Illuminate\Http\Request;
 use App\Models\Campaign;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Answer;
+use Carbon\Carbon;
+use App\Models\PretestQuestionList;
+use App\Models\QuestionList;
+use App\Models\Question;
+use App\Models\AnswerList;
 use DB;
+
 
 class PretestController extends Controller
 {
@@ -15,7 +21,7 @@ class PretestController extends Controller
     public function setAnswers(Request $request, $pretest_id){
         $request->validate([
             'question_lists'=>'array',
-            'question_lists.*.question_list_type'=>'required',
+            // 'question_lists.*.question_list_type'=>'required',
             'question_lists.*.answer_lists'=>'array',
         ]);
         $user = $request->user();
@@ -173,7 +179,7 @@ class PretestController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
         
@@ -194,9 +200,12 @@ class PretestController extends Controller
 
         $uncompleted_pretests =  Pretest::withCount('question_lists')->whereHas('campaigns',function($query){
             $query->where('campaigns.user_id','=',auth()->user()->id)->where(function($query2){
-                $query2->where('is_submitted',false)->orWhereNull('is_submitted');
+                $query2->where('is_submitted',false)->orWhereNull('is_submitted')
+                ->whereRaw('ABS(TIMESTAMPDIFF(MINUTE,campaigns.created_at,?))<8', [Carbon::now()]);
             });
         })->get();
+
+        // $request->session()->flash('status', 'Task was successful!');
 
         return \Inertia\Inertia::render('Pretest/Index',['user'=>$user, 'uncompleted_pretests'=>$uncompleted_pretests, 'items'=>$pretests, 'pretest_campaigns'=>$pretest_campaigns]);
     }
@@ -211,61 +220,177 @@ class PretestController extends Controller
         //
     }
 
+    // mengurutkan apakah 2 array number sama. contoh: [3,2,1] dan [1,3,2] adalah sama
+    function checkIsSame($a, $b){
+        if(count($a)!==count($b))return false;
+        sort($a);
+        sort($b);
+        foreach($a as $k=>$v){
+            if($v!==$b[$k])return false;
+        }
+        return true;
+    }
     /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    
     public function store(Request $request)
     {
-        //return $request;
-        if($request->has('question_lists')){
-            $pretest = Pretest::findOrFail($request->id);
-            $campaign = new \App\Models\Campaign;
-            $campaign->user_id = auth()->user()->id;
-            $pretest->campaigns()->save($campaign);
+        $request->validate([
+            'question_lists'=>'array',
+            'question_lists.*.id'=>'required',
+            'question_lists.*.answer'=>'required',
+        ]);
+        $user = $request->user();
+        $pretest = Pretest::findOrFail($request->id);
+        // cek apakah ada campaign dgn pretest_id sekain dan user auth
+        $campaign = Campaign::whereHasMorph('campaignable',[Pretest::class],  function (Builder $query, $type)use($pretest, $user) {
+            $query->where('pretests.id', $pretest->id);
+        })->where('user_id', $user->id)->first();
 
-            //$campaign = $request->user()->campaigns()->save(new \App\Models\Campaign);
-
-            // $request->user
-            $score=0;
-            $selectoptions_count = $textfield_count = 0;
-            foreach($request->question_lists as $question_list){
-                
-                $question = \App\Models\QuestionList::findOrFail($question_list['id']);
-                $question_db = new \App\Models\Question;
-                $question_db->question_list_id = $question->id;
-                $question_db->value = $question->value;
-
-                $campaign->questions()->save($question_db);
-
-                $answer_db = new \App\Models\Answer; 
-                if($question->question_list_type->name=="selectoptions"){
-                    $answer = \App\Models\AnswerList::findOrFail($question_list['answer']);
-                    $answer_db->answer_list_id = $answer->id;
-                    $answer_db->value = $answer->value;
-                    $answer_db->score = $answer->score;
-                    $selectoptions_count++;
-                }else{
-                    $answer_db->answer_list_id = null;
-                    $answer_db->score = null; //jika uraian maka harus koreksi manual
-                    $answer_db->value = $question_list['answer'];
-                    $textfield_count++;
+        if($campaign){
+            // return $campaign->created_at;
+            $begin = $campaign->created_at;
+            $end = Carbon::now();
+            $diff = $begin->diffInMinutes($end);
+            // jika lebih besar dri 7 menit, maka jgn simpan
+            if($diff>7){
+               return response('<h1>Waktu Habis</h1>', 403);
+            }
+            if($campaign->is_submitted){
+                return response('<h2>Anda sudah mengerjakan soal ini</h2>', 403);
+            }
+            try {
+                $pretest->load('question_lists.question_list_type','question_lists.answer_lists');
+                // menampung question lists dan jawaban ke array key
+                $db_question_list_ids = [];
+                $db_question_lists = [];
+                foreach($pretest->question_lists as $question_list){
+                    $db_question_lists[$question_list->id] = $question_list;
+                    // menampung answer_lists di array key
+                    $arr_answer_lists = [];
+                    foreach($db_question_lists[$question_list->id]->answer_lists as $answer_list){
+                        $arr_answer_lists[$answer_list->id] = $answer_list;
+                    }
+                    $db_question_lists[$question_list->id]->arr_answer_lists = $arr_answer_lists;
+                    $db_question_list_ids[] = $question_list->id;
                 }
-                $score+=$answer_db->score;
-                $question_db->answer()->save($answer_db);
 
-            }
-             //jika semua soal pilihan ganda, maka langsung hitung skor akhir
-             if($selectoptions_count==count($request->question_lists)){
-                $score=$score/$selectoptions_count;
-                $campaign->value = $score;
+                // return $db_question_lists;
+                // $campaign = new \App\Models\Campaign;
+                // $campaign->user_id = auth()->user()->id;
+                // $pretest->campaigns()->save($campaign);
+    
+                //$campaign = $request->user()->campaigns()->save(new \App\Models\Campaign);
+                $request_question_list_ids = [];
+                $request_question_lists = [];
+                foreach($request->question_lists as $question_list){
+                    $request_question_list_ids[] = $question_list['id'];
+                    $request_question_lists[$question_list['id']] = $question_list;
+                }
+                
+                // jika id pada request question_lists dan db question_lists tidak identik, maka throw error
+                if(!$this->checkIsSame($db_question_list_ids, $request_question_list_ids)){
+                    return response('<h1>Opps, ngapain gan :p</h1>', 403);
+                }
+
+              
+                DB::beginTransaction();
+ 
+                foreach($request_question_lists as $question_list){
+
+                    $db_question_list = $db_question_lists[$question_list['id']];
+
+                    // walaupun data `question` di sudah ada hasil dri method setanswers, tpi buat jaga2 saja
+                    Question::updateOrCreate(['campaign_id'=>$campaign->id, 
+                    'question_list_id'=>$db_question_list->id],
+                    ['value'=>$db_question_list->value, 'updated_at'=>Carbon::now()]
+                    );
+
+                    // $question_list_type = $db_question_list->question_list_type;
+                   
+                 
+
+                    // $question = QuestionList::findOrFail($question_list['id']);
+                    // $question_db = new Question;
+                    // $question_db->question_list_id = $question->id;
+                    // $question_db->value = $question->value;
+    
+                    // $campaign->questions()->save($question_db);
+    
+                    // $answer_db = new Answer; 
+                    // if($question->question_list_type->name=="selectoptions"){
+                    //     $answer = AnswerList::findOrFail($question_list['answer']);
+                    //     $answer_db->answer_list_id = $answer->id;
+                    //     $answer_db->value = $answer->value;
+                    //     $answer_db->score = $answer->score;
+                    //     $selectoptions_count++;
+                    // }else{
+                    //     $answer_db->answer_list_id = null;
+                    //     $answer_db->score = null; //jika uraian maka harus koreksi manual
+                    //     $answer_db->value = $question_list['answer'];
+                    //     $textfield_count++;
+                    // }
+                    // $score+=$answer_db->score;
+                    // $question_db->answer()->save($answer_db);
+    
+                }
+                // setelah Question::updateOrCreate dri proses di atas, pasti ada campaign->questions
+                $score_total = 0;
+                $selectoptions_count = $textfield_count = 0;
+                
+                foreach($campaign->questions as $question){
+                    $db_question_list = $db_question_lists[$question->question_list_id];
+                    $request_question_list = $request_question_lists[$question->question_list_id];
+
+                    $question_list_type = $db_question_list->question_list_type;
+
+                    if($question_list_type->name=="selectoptions"){
+                        $selectoptions_count++; 
+                        $score = $db_question_list->arr_answer_lists[$request_question_list['answer']]['score']; //jika pilihan ganda, score'nya antara 100 (benar) atau null (salah)
+                        $score_total+=$score;
+
+                        $selected_answer_list_id = $request_question_list['answer']; //answer adalah answer_list_id yg dipilih user
+                        $value = $db_question_list->value;
+                    
+                    }else{
+                        $textfield_count++;
+                        $score = null; //jika uraian maka harus koreksi manual
+                        $selected_answer_list_id = null; //jika uraian maka tidak perlu answer_list_id
+                        $value = $request_question_list->answer; //answer adalah kalimat jawaban dri user
+                    }
+                    Answer::updateOrCreate([
+                        'question_id'=>$question->id,
+                    ], ['score'=>$score, 'value'=>$value, 'answer_list_id'=>$selected_answer_list_id,]);
+                }
+                // jika semua soal pilihan ganda, maka langsung hitung skor akhir dan simpan di campaign
+                if($selectoptions_count==count($db_question_lists)){
+                    $score=$score_total/$selectoptions_count;
+                    $campaign->value = $score;
+                   
+                }
+                $campaign->is_submitted = true; 
                 $campaign->save();
+
+                DB::commit();
+            }catch (\PDOException $e) {
+                // Woopsy
+                dd($e);
+                DB::rollBack();
             }
-          
-            return redirect()->route('pretests.index');
+
         }
+      
+        return 'cok';
+        // if($campaign)
+        //return $request;
+        
+        
+        
+        return redirect()->route('pretests.index');
     }
 
     /**
