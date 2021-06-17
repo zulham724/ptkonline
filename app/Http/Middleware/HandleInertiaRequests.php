@@ -34,7 +34,7 @@ class HandleInertiaRequests
         //cek apakah ada pretest campaign yg belum expired dan belum disubmit
         $pretest_campaign = \App\Models\Campaign::whereHasMorph('campaignable',[\App\Models\Pretest::class])->where(function(Builder $query){
             $query->where('is_submitted',false)->orWhereNull('is_submitted');
-        })->whereRaw('TIMESTAMPDIFF(SECOND,campaigns.created_at,?)<=?', [\Carbon\Carbon::now(), $seconds_end]);
+        })->where('user_id',$user->id)->whereRaw('TIMESTAMPDIFF(SECOND,campaigns.created_at,?)<=?', [\Carbon\Carbon::now(), $seconds_end]);
         if($pretest_campaign->exists()){
           
             $pretest_campaign =  $pretest_campaign->first();
@@ -50,7 +50,7 @@ class HandleInertiaRequests
         $seconds_end = 60*env('POSTTEST_TIMER', 7);
         $posttest_campaign = \App\Models\Campaign::whereHasMorph('campaignable',[\App\Models\Posttest::class])->where(function(Builder $query){
             $query->where('is_submitted',false)->orWhereNull('is_submitted');
-        })->whereRaw('TIMESTAMPDIFF(SECOND,campaigns.created_at,?)<=?', [\Carbon\Carbon::now(), $seconds_end]);
+        })->where('user_id',$user->id)->whereRaw('TIMESTAMPDIFF(SECOND,campaigns.created_at,?)<=?', [\Carbon\Carbon::now(), $seconds_end]);
         if($posttest_campaign->exists()){
 
             $posttest_campaign = $posttest_campaign->first();
