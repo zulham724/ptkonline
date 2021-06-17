@@ -52,6 +52,9 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function(){
 
     Route::post('/beginpretest/{pretest_id}', [PretestController::class, 'beginTest']);
     Route::post('/pretest/{pretest_id}/setanswers', [PretestController::class, 'setAnswers']);
+
+    Route::post('/beginposttest/{posttest_id}', [PosttestController::class, 'beginTest']);
+    Route::post('/posttest/{posttest_id}/setanswers', [PosttestController::class, 'setAnswers']);
     
     Route::resource('pretests', PretestController::class);
     Route::resource('posttests', PosttestController::class);
@@ -78,8 +81,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function(){
 
 Route::get('/test', function(){
     $first = Carbon\Carbon::create('2020-09-28 03:54:56');
-    $second = Carbon\Carbon::now();
-    return $first->diffInMinutes($second);
+    // return
 
 })->middleware('auth:sanctum');
 

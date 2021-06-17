@@ -97,16 +97,29 @@ class PretestController extends Controller
             $query->where('id','!=',$target_id);
         })->where(function($query){
             $query->where('is_submitted',false)->orWhereNull('is_submitted');
-        })->whereRaw('ABS(TIMESTAMPDIFF(SECOND,campaigns.created_at,?))<=?', [Carbon::now(), $this->timer])
+        })->whereRaw('TIMESTAMPDIFF(SECOND,campaigns.created_at,?)<=?', [Carbon::now(), $this->timer])
         ->where('user_id', $user->id)->exists();
         if($exists)return false;
         return true; 
+    }
+    // cek apakah ada posttest campaign yg aktif (belum expired) dan is_submitted=false
+    public function checkActivePosttestCampaign(){
+        $seconds_end = 60*intval(env('POSTTEST_TIMER', 7));
+        $user = auth()->user();
+        $exists = Campaign::whereHasMorph('campaignable', [\App\Models\Posttest::class])
+        ->where(function(Builder $query){
+            $query->where('is_submitted',false)->orWhereNull('is_submitted');
+        })->whereRaw('TIMESTAMPDIFF(SECOND,campaigns.created_at,?)<=?', [Carbon::now(), $seconds_end])
+        ->where('user_id', $user->id);
+        // return $exists->toSql();
+        if($exists)return true;
+        return false;
     }
     public function checkIsExpired($target_id){
         $user = auth()->user();
         $exists = Campaign::whereHasMorph('campaignable', [Pretest::class], function(Builder $query)use($target_id){
             $query->where('id',$target_id);
-        })->whereRaw('ABS(TIMESTAMPDIFF(SECOND,campaigns.created_at,?))<=?', [Carbon::now(), $this->timer])
+        })->whereRaw('TIMESTAMPDIFF(SECOND,campaigns.created_at,?)<=?', [Carbon::now(), $this->timer])
         ->where('user_id', $user->id)->exists();
         if($exists)return false;
         return true; 
@@ -115,15 +128,19 @@ class PretestController extends Controller
         $user = auth()->user();
         $query = Campaign::whereHasMorph('campaignable', [Pretest::class],  function (Builder $query)use($pretest_id, $user) {
             $query->where('pretests.id', $pretest_id)
-            ->whereRaw('ABS(TIMESTAMPDIFF(SECOND,campaigns.created_at,?))<=?', [Carbon::now(), $this->timer]);
+            ->whereRaw('TIMESTAMPDIFF(SECOND,campaigns.created_at,?)<=?', [Carbon::now(), $this->timer]);
         })->where('user_id', $user->id);
         return $query;
     }
     public function beginTest(Request $request, $pretest_id){
 
         if(!$this->checkIsCampaignable($pretest_id)){
-            $request->session()->flash('warning', 'Ada soal lain yang masih dikerjakan');
+            $request->session()->flash('warning', 'Ada soal pretest lain yang masih dikerjakan');
             return redirect()->route('pretests.index');
+        }
+        if($this->checkActivePosttestCampaign()){
+            $request->session()->flash('warning', 'Ada soal posttest yang masih dikerjakan');
+            return redirect()->route('posttests.index');
         }
         
         // BEGIN preprocessing pretest
@@ -255,13 +272,13 @@ class PretestController extends Controller
         $uncompleted_pretests =  Pretest::withCount('question_lists')->whereHas('campaigns',function($query){
             $query->where('campaigns.user_id','=',auth()->user()->id)->where(function($query2){
                 $query2->where('is_submitted',false)->orWhereNull('is_submitted')
-                ->whereRaw('ABS(TIMESTAMPDIFF(SECOND,campaigns.created_at,?))<=?', [Carbon::now(), $this->timer]);
+                ->whereRaw('TIMESTAMPDIFF(SECOND,campaigns.created_at,?)<=?', [Carbon::now(), $this->timer]);
             });
         })->get();
 
         // completed jika is_submitted=true dan selisih now() dan campaign.created_at > $this->timer
         $completed_pretests = Campaign::with('campaignable')->whereHasMorph('campaignable', [Pretest::class], function(Builder $query){
-            $query->where('is_submitted',true)->orWhereRaw('ABS(TIMESTAMPDIFF(SECOND,campaigns.created_at,?))>?', [Carbon::now(), $this->timer]);
+            $query->where('is_submitted',true)->orWhereRaw('TIMESTAMPDIFF(SECOND,campaigns.created_at,?)>?', [Carbon::now(), $this->timer]);
         })->get();
         // return $
         return \Inertia\Inertia::render('Pretest/Index',['completed_pretests'=>$completed_pretests, 'user'=>$user, 'uncompleted_pretests'=>$uncompleted_pretests, 'items'=>$pretests]);

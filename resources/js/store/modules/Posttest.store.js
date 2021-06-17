@@ -12,12 +12,15 @@ const getters = {
 }
 // Actions 
 const actions = {
-    // setAnswer({ commit }, payload) {
-    //     return new Promise( (resolve, reject) => {
-    //            alert('anjay')
-    //            resolve();
-    //     })
-    // },
+    setAnswers({ commit }, posttest) {
+        return new Promise((resolve, reject) => {
+            axios
+                .post(`/posttest/${posttest.id}/setanswers`, posttest)
+                .then(res => {
+                    console.log(res.data);
+                });
+        });
+    }
     
     
 }
