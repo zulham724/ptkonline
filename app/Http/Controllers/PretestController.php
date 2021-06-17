@@ -264,13 +264,14 @@ class PretestController extends Controller
     //    return $data->get()  ;
         // return $campaign_items;
         //return Pretest::withCount('question_lists')->get();
-        $pretests = Pretest::withCount('question_lists')->whereDoesntHave('campaigns',function($query){
-            $query->where('campaigns.user_id','=',auth()->user()->id);
-        })->get();
         $user = auth()->user()->loadCount('pretest_campaigns','posttest_campaigns','classroom_researches');
 
-        $uncompleted_pretests =  Pretest::withCount('question_lists')->whereHas('campaigns',function($query){
-            $query->where('campaigns.user_id','=',auth()->user()->id)->where(function($query2){
+        $pretests = Pretest::withCount('question_lists')->whereDoesntHave('campaigns',function($query)use($user){
+            $query->where('campaigns.user_id','=',$user->id);
+        })->get();
+
+        $uncompleted_pretests =  Pretest::withCount('question_lists')->whereHas('campaigns',function($query)use($user){
+            $query->where('campaigns.user_id','=',$user->id)->where(function($query2){
                 $query2->where('is_submitted',false)->orWhereNull('is_submitted')
                 ->whereRaw('TIMESTAMPDIFF(SECOND,campaigns.created_at,?)<=?', [Carbon::now(), $this->timer]);
             });
@@ -279,7 +280,7 @@ class PretestController extends Controller
         // completed jika is_submitted=true dan selisih now() dan campaign.created_at > $this->timer
         $completed_pretests = Campaign::with('campaignable')->whereHasMorph('campaignable', [Pretest::class], function(Builder $query){
             $query->where('is_submitted',true)->orWhereRaw('TIMESTAMPDIFF(SECOND,campaigns.created_at,?)>?', [Carbon::now(), $this->timer]);
-        })->orderBy('campaigns.id','desc')->get();
+        })->where('user_id', $user->id)->orderBy('campaigns.id','desc')->get();
         // return $
         return \Inertia\Inertia::render('Pretest/Index',['completed_pretests'=>$completed_pretests, 'user'=>$user, 'uncompleted_pretests'=>$uncompleted_pretests, 'items'=>$pretests]);
     }

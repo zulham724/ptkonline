@@ -262,13 +262,14 @@ class PosttestController extends Controller
     //    return $data->get()  ;
         // return $campaign_items;
         //return Posttest::withCount('question_lists')->get();
-        $posttests = Posttest::withCount('question_lists')->whereDoesntHave('campaigns',function($query){
-            $query->where('campaigns.user_id','=',auth()->user()->id);
-        })->get();
         $user = auth()->user()->loadCount('posttest_campaigns','posttest_campaigns','classroom_researches');
 
-        $uncompleted_posttests =  Posttest::withCount('question_lists')->whereHas('campaigns',function($query){
-            $query->where('campaigns.user_id','=',auth()->user()->id)->where(function($query2){
+        $posttests = Posttest::withCount('question_lists')->whereDoesntHave('campaigns',function($query)use($user){
+            $query->where('campaigns.user_id','=',$user->id);
+        })->get();
+
+        $uncompleted_posttests =  Posttest::withCount('question_lists')->whereHas('campaigns',function($query)use($user){
+            $query->where('campaigns.user_id','=',$user->id)->where(function($query2){
                 $query2->where('is_submitted',false)->orWhereNull('is_submitted')
                 ->whereRaw('TIMESTAMPDIFF(SECOND,campaigns.created_at,?)<=?', [Carbon::now(), $this->timer]);
             });
@@ -277,7 +278,7 @@ class PosttestController extends Controller
         // completed jika is_submitted=true dan selisih now() dan campaign.created_at > $this->timer
         $completed_posttests = Campaign::with('campaignable')->whereHasMorph('campaignable', [Posttest::class], function(Builder $query){
             $query->where('is_submitted',true)->orWhereRaw('TIMESTAMPDIFF(SECOND,campaigns.created_at,?)>?', [Carbon::now(), $this->timer]);
-        })->orderBy('campaigns.id','desc')->get();
+        })->where('user_id', $user->id)->orderBy('campaigns.id','desc')->get();
         // return $
         return \Inertia\Inertia::render('Posttest/Index',['completed_posttests'=>$completed_posttests, 'user'=>$user, 'uncompleted_posttests'=>$uncompleted_posttests, 'items'=>$posttests]);
     }
