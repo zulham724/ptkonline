@@ -277,7 +277,7 @@ class PosttestController extends Controller
         // completed jika is_submitted=true dan selisih now() dan campaign.created_at > $this->timer
         $completed_posttests = Campaign::with('campaignable')->whereHasMorph('campaignable', [Posttest::class], function(Builder $query){
             $query->where('is_submitted',true)->orWhereRaw('TIMESTAMPDIFF(SECOND,campaigns.created_at,?)>?', [Carbon::now(), $this->timer]);
-        })->get();
+        })->orderBy('campaigns.id','desc')->get();
         // return $
         return \Inertia\Inertia::render('Posttest/Index',['completed_posttests'=>$completed_posttests, 'user'=>$user, 'uncompleted_posttests'=>$uncompleted_posttests, 'items'=>$posttests]);
     }

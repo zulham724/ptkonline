@@ -1,5 +1,6 @@
 <template>
     <v-app id="inspire">
+        
         <v-navigation-drawer v-model="drawer" app>
             <v-list dense>
                 <v-list-item-group v-model="item" color="primary">
@@ -122,6 +123,33 @@
             <v-toolbar-title>Penelitian Tindakan Kelas</v-toolbar-title>
             <v-spacer></v-spacer>
 
+            <div v-if="$page.active_campaign">
+                <v-chip color="info">Soal {{$page.active_campaign.campaign_type=='App\\Models\\Pretest'?'Pre Test':'Post Test'}} sedang dikerjakan.
+ <vue-countdown-timer
+                    :start-time="$page.active_campaign.start_at"
+                    :end-time="$page.active_campaign.end_at"
+                    :interval="1000"
+                    :start-label="'Until start:'"
+                    :end-label="' Sisa waktu'"
+                    label-position="begin"
+                    :end-text="'Waktu habis!'"
+                    :day-txt="'hari'"
+                    :hour-txt="'jam'"
+                    :minutes-txt="'menit'"
+                    :seconds-txt="'detik'"
+                >
+                    <template v-slot:countdown="scope">
+                          {{
+                                scope.props.minutes + ":" + scope.props.seconds
+                            }}
+                    </template>
+                </vue-countdown-timer>
+
+                </v-chip>
+               
+            </div>
+             <v-spacer v-if="$page.active_campaign"></v-spacer>
+          
             <v-menu
 
                 offset-y
@@ -193,7 +221,7 @@
         </v-app-bar>
 
         <v-main>
-            <v-container class="_fill-height" fluid>
+                
                 <v-row align="center" justify="center">
                     <v-col>
                         <!--<router-view :educational-levels="{{$educational_levels}}"></router-view>-->

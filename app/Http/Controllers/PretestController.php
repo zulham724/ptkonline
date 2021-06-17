@@ -110,7 +110,7 @@ class PretestController extends Controller
         ->where(function(Builder $query){
             $query->where('is_submitted',false)->orWhereNull('is_submitted');
         })->whereRaw('TIMESTAMPDIFF(SECOND,campaigns.created_at,?)<=?', [Carbon::now(), $seconds_end])
-        ->where('user_id', $user->id);
+        ->where('user_id', $user->id)->exists();
         // return $exists->toSql();
         if($exists)return true;
         return false;
@@ -279,7 +279,7 @@ class PretestController extends Controller
         // completed jika is_submitted=true dan selisih now() dan campaign.created_at > $this->timer
         $completed_pretests = Campaign::with('campaignable')->whereHasMorph('campaignable', [Pretest::class], function(Builder $query){
             $query->where('is_submitted',true)->orWhereRaw('TIMESTAMPDIFF(SECOND,campaigns.created_at,?)>?', [Carbon::now(), $this->timer]);
-        })->get();
+        })->orderBy('campaigns.id','desc')->get();
         // return $
         return \Inertia\Inertia::render('Pretest/Index',['completed_pretests'=>$completed_pretests, 'user'=>$user, 'uncompleted_pretests'=>$uncompleted_pretests, 'items'=>$pretests]);
     }
