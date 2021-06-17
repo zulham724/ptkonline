@@ -221,7 +221,7 @@
         </v-app-bar>
 
         <v-main>
-                
+            {{$page.test}}
                 <v-row align="center" justify="center">
                     <v-col>
                         <!--<router-view :educational-levels="{{$educational_levels}}"></router-view>-->
