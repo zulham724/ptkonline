@@ -412,7 +412,9 @@ export default {
                 showLoaderOnConfirm: true,
                 preConfirm: login => {
                     return this.$inertia
-                        .delete(`/classroom_researches/${item_id}`)
+                        .post(`/classroom_researches/${item_id}`, {
+                            _method:'delete'
+                        })
                         .then(response => {
                             console.log(response);
                             return response;

@@ -38,7 +38,8 @@ class ProcessClassRoomResearch implements ShouldQueue
         //$all
         //DB::enableQueryLog(); // Enable query log
 
-        $allpreviouscontents=\App\Models\ClassroomResearchContent::where('classroom_research_id','!=',$this->classroomResearch->id)->where('created_at','<=', $this->classroomResearch->created_at)->get();
+        // $allpreviouscontents=\App\Models\ClassroomResearchContent::where('classroom_research_id','!=',$this->classroomResearch->id)->where('created_at','<=', $this->classroomResearch->created_at)->get();
+        $allpreviouscontents=\App\Models\ClassroomResearchContent::where('classroom_research_id','!=',$this->classroomResearch->id)->where('id','<', $this->classroomResearch->id)->get();
 
         //dd(DB::getQueryLog()); // Show results of log
         //dd($allpreviouscontents);
