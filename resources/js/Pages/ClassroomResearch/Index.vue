@@ -306,12 +306,14 @@ export default {
             items2: [],
             headers: [
                 {
-                    text: "ID",
-                    value: "id"
+                    text: "Nama",
+                    value: "user.name",
+                    sortable:false,
                 },
                 {
                     text: "Judul",
-                    value: "title"
+                    value: "title",
+                     sortable:false,
                 },
                 {
                     text: "Tahun",
