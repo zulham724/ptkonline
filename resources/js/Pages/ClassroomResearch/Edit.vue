@@ -35,7 +35,8 @@
             <v-row class="text-h6">{{format.name}}</v-row>
             <v-row>
                 <v-col lg="12">
-                    <vue-editor v-model="format.html" />
+                      <wysiwyg v-model="format.html" />
+                    <!-- <vue-editor v-model="format.html" /> -->
 
                 </v-col>
 
@@ -189,3 +190,4 @@ export default {
     }
 }
 </script>
+

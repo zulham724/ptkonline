@@ -13,6 +13,8 @@ import 'vuetify/dist/vuetify.min.css'
 import { InertiaProgress } from '@inertiajs/progress'
 import store from './store';
 import VueCountdownTimer from 'vuejs-countdown-timer';
+import wysiwyg from "vue-wysiwyg";
+Vue.use(wysiwyg, {}); // config is optional. more below
 
 InertiaProgress.init({
     // The delay after which the progress bar will
@@ -31,7 +33,8 @@ InertiaProgress.init({
 
 //import 'codemirror/lib/codemirror.css';
 //import '@toast-ui/editor/dist/toastui-editor.css';
- 
+import "vue-wysiwyg/dist/vueWysiwyg.css";
+
 //import { Editor } from '@toast-ui/vue-editor';
 
 import Vue2Editor from "vue2-editor";

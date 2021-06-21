@@ -219,7 +219,8 @@
                                 }}</v-row>
                                 <v-row>
                                     <v-col lg="12">
-                                        <vue-editor v-model="content.value" />
+                                         <wysiwyg v-model="content.value" />
+                                        <!-- <vue-editor v-model="content.value" /> -->
                                     </v-col>
                                 </v-row>
                             </div>
