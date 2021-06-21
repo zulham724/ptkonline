@@ -47,8 +47,11 @@
         >
             <v-card-text>
                 {{ i + 1 }}.
-                <span class="black--text">{{ question_list.value }}</span>
-
+                <span
+                    style="white-space: break-spaces; "
+                    class="black--text"
+                    v-html="question_list.value"
+                ></span>
                 <v-radio-group
                     v-model="question_list.answer"
                     class="mb-n5"
