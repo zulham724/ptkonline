@@ -7,6 +7,7 @@ use App\Models\ClassroomResearchFormat;
 use App\Models\ClassroomResearchContent;
 use Illuminate\Http\Request;
 use App\Jobs\ProcessClassRoomResearch;
+use DB;
 class ClassroomResearchController extends Controller
 {
     /**
@@ -64,25 +65,38 @@ class ClassroomResearchController extends Controller
      */
     public function store(Request $request)
     {
-        if($request->has('contents') && $request->has('data')){
-            $classroomResearch = new ClassroomResearch;
-            $classroomResearch->year = $request->data['year'];
-            $classroomResearch->title = $request->data['title'];
-            $classroomResearch->school_name = $request->data['school_name'];
-            $classroomResearch->school_address = $request->data['school_address'];
-            $classroomResearch->educational_level_id = $request->data['educational_level'];
-            $classroomResearch = $request->user()->classroom_researches()->save($classroomResearch);
+        try{
+            DB::beginTransaction();
 
-            foreach($request->contents as $content){
-                $classroomResearchContent = new ClassroomResearchContent;
-                $classroomResearchContent->name = $content['name'];
-                $classroomResearchContent->value = isset($content['html'])?$content['html']:null;
-                $classroomResearch->classroom_research_contents()->save($classroomResearchContent);
+            if($request->has('contents') && $request->has('data')){
+                $classroomResearch = new ClassroomResearch;
+                $classroomResearch->year = $request->data['year'];
+                $classroomResearch->title = $request->data['title'];
+                $classroomResearch->school_name = $request->data['school_name'];
+                $classroomResearch->school_address = $request->data['school_address'];
+                $classroomResearch->educational_level_id = $request->data['educational_level'];
+                $classroomResearch = $request->user()->classroom_researches()->save($classroomResearch);
+    
+                foreach($request->contents as $content){
+                    $classroomResearchContent = new ClassroomResearchContent;
+                    $classroomResearchContent->name = $content['name'];
+                    $classroomResearchContent->value = isset($content['html'])?$content['html']:null;
+                    $classroomResearch->classroom_research_contents()->save($classroomResearchContent);
+                }
+                ProcessClassRoomResearch::dispatch($classroomResearch);
+    
             }
-            ProcessClassRoomResearch::dispatch($classroomResearch);
+
+            DB::commit();
+
             return redirect()->route('classroom_researches.index');
 
+        }catch (\PDOException $e) {
+            // Woopsy
+            dd($e);
+            DB::rollBack();
         }
+        
     }
 
     /**
