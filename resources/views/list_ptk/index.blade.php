@@ -74,7 +74,7 @@
                                                     Tambah Komentar
                                                 </v-btn>
                                                 <v-btn :loading="loading" @click="submitComments(item.id)"
-                                                    v-if="item.classroom_research_comments" color="primary">
+                                                    v-if="item.classroom_research_comments && item.classroom_research_comments.length" color="primary">
                                                     Simpan komentar
                                                 </v-btn>
                                             </v-col>
@@ -89,6 +89,10 @@
                                 <v-icon
                                     @click="print(item.id)">
                                     mdi-printer
+                                </v-icon>
+                                <v-icon
+                                    @click="expandAndAddComment(item)">
+                                    mdi-comment
                                 </v-icon>
                                 </template>
                             </v-data-table>
@@ -256,6 +260,11 @@
                             });
                         }
                     },
+                    expandAndAddComment:function(item){
+                        this.expanded.push(item);
+                        this.addComment(item.id);
+
+                    },
                     removeComment: function (item_id, index) {
                         const data = this.dataTableItems.find(e => e.id == item_id);
                         if (data) {
@@ -391,6 +400,9 @@
 
                 },
                 watch: {
+                    expanded:function(val){
+                        console.log(val)
+                    },
                     options: {
                         handler(new1, old) {
                             //console.log(new1)
