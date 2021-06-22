@@ -85,6 +85,12 @@
 
                                     </td>
                                 </template>
+                                <template v-slot:item.action="{ item }">
+                                <v-icon
+                                    @click="print(item.id)">
+                                    mdi-printer
+                                </v-icon>
+                                </template>
                             </v-data-table>
                         </v-col>
 
@@ -180,6 +186,10 @@
                     }
                 },
                 methods: {
+                    print(id) {
+                        window.open(`/classroom_research/${id}/download`, "_blank");
+                        // this.$inertia.visit();
+                    },
                     submitComments: function (item_id) {
                         const data = this.dataTableItems.find(e => e.id == item_id);
                         if (data) {
