@@ -58,7 +58,7 @@
                                     <v-textarea
                                         readonly
                                         name="input-7-1"
-                                        :label="`Komentar #${comment_i+1}`"
+                                        :label="`Komentar #${comment_i + 1}`"
                                         :value="comment.value"
                                     ></v-textarea>
                                 </v-col>
@@ -137,7 +137,10 @@
                         <v-spacer></v-spacer>
                         <v-toolbar-items>
                             <v-btn dark text @click="editDialog = false">
-                                Tutup
+                                <v-icon left>
+                                    mdi-content-save
+                                </v-icon>
+                                Simpan Perubahan
                             </v-btn>
                         </v-toolbar-items>
                     </v-toolbar>
@@ -219,7 +222,7 @@
                                 }}</v-row>
                                 <v-row>
                                     <v-col lg="12">
-                                         <wysiwyg v-model="content.value" />
+                                        <wysiwyg v-model="content.value" />
                                         <!-- <vue-editor v-model="content.value" /> -->
                                     </v-col>
                                 </v-row>
@@ -228,11 +231,16 @@
                                 class="d-flex justify-end"
                                 v-if="build.educational_level_id"
                             >
+                             
                                 <v-btn
                                     class="mt-2"
                                     color="primary"
                                     @click="submit"
-                                    >Edit Proposal PTK</v-btn
+                                    >
+                                     <v-icon left>
+                                    mdi-content-save
+                                </v-icon>
+                                    Simpan Perubahan</v-btn
                                 >
                             </div>
                         </v-form>
@@ -309,12 +317,12 @@ export default {
                 {
                     text: "Nama",
                     value: "user.name",
-                    sortable:false,
+                    sortable: false
                 },
                 {
                     text: "Judul",
                     value: "title",
-                     sortable:false,
+                    sortable: false
                 },
                 {
                     text: "Tahun",
@@ -414,7 +422,7 @@ export default {
                 preConfirm: login => {
                     return this.$inertia
                         .post(`/classroom_researches/${item_id}`, {
-                            _method:'delete'
+                            _method: "delete"
                         })
                         .then(response => {
                             console.log(response);
