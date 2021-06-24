@@ -136,7 +136,7 @@
                         <v-toolbar-title>Edit PTK</v-toolbar-title>
                         <v-spacer></v-spacer>
                         <v-toolbar-items>
-                            <v-btn dark text @click="editDialog = false">
+                            <v-btn dark text @click="submit">
                                 <v-icon left>
                                     mdi-content-save
                                 </v-icon>
