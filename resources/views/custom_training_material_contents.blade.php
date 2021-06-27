@@ -40,12 +40,12 @@
             </v-row>
            
             <v-expansion-panels multiple v-model="panels">
-                <v-expansion-panel v-for="(content,i) in contents" :key="i">
+                <v-expansion-panel  v-for="(content,i) in contents" :key="i">
                             <v-expansion-panel-header>#@{{i+1}} @{{content.name}}</v-expansion-panel-header>
-                            <v-expansion-panel-content>
+                            <v-expansion-panel-content style="height:50vh">
                                 <v-text-field v-model="content.name" label="Judul konten" placeholder="Tulis judul konten Anda di sini" outlined append-outer-icon="mdi-close" @click:append-outer="removeContent(i)"></v-text-field>
                                 <!-- <v-textarea v-model="content.value" label="Isi konten" placeholder="Tulis isi konten Anda di sini" outlined ></v-textarea> -->
-                                <quill-editor   :options="editorOption" ref="quillEditorA" v-model="content.value"></quill-editor>
+                                <quill-editor    :options="editorOption" ref="quillEditorA" v-model="content.value"></quill-editor>
                                
                                 <!-- <div v-if="question_list.question_list_type.name=='selectoptions'">
                                     <div v-for="(answer_list, n) in question_list.answer_lists" :key="`answer${n}`">
@@ -98,6 +98,7 @@
 <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
 <!--<script type="module" src="https://unpkg.com/vue2-editor/dist/vue2-editor.umd.min.js"></script>-->
 
 

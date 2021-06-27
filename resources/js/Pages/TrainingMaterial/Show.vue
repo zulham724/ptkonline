@@ -2,7 +2,7 @@
 <v-container fluid>
     <div class="text-h4">{{data.name}}</div>
     <div class="text-h6">{{data.description}}</div>
-    <div class="text-caption mb-5">Dibuat tanggal: {{data.created_at | moment("dddd, DD MMMM YYYY")}}</div>
+    <!-- <div class="text-caption mb-5">Dibuat tanggal: {{data.created_at | moment("dddd, DD MMMM YYYY")}}</div> -->
 
     <v-card elevation="1" v-for="(content, n) in data.training_material_contents" :key="n" class="mb-1">
         <v-card-title>{{content.name}}</v-card-title>
