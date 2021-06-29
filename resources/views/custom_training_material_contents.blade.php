@@ -42,10 +42,12 @@
             <v-expansion-panels multiple v-model="panels">
                 <v-expansion-panel  v-for="(content,i) in contents" :key="i">
                             <v-expansion-panel-header>#@{{i+1}} @{{content.name}}</v-expansion-panel-header>
-                            <v-expansion-panel-content style="height:50vh">
+                            <v-expansion-panel-content style="height:60vh">
                                 <v-text-field v-model="content.name" label="Judul konten" placeholder="Tulis judul konten Anda di sini" outlined append-outer-icon="mdi-close" @click:append-outer="removeContent(i)"></v-text-field>
                                 <!-- <v-textarea v-model="content.value" label="Isi konten" placeholder="Tulis isi konten Anda di sini" outlined ></v-textarea> -->
-                                <quill-editor    :options="editorOption" ref="quillEditorA" v-model="content.value"></quill-editor>
+                                <quill-editor   :options="editorOption" ref="quillEditorA" v-model="content.value" style="height:260px"></quill-editor>
+                                <!-- <vue-html5-editor :content="content.value" :height="500"></vue-html5-editor> -->
+
                                
                                 <!-- <div v-if="question_list.question_list_type.name=='selectoptions'">
                                     <div v-for="(answer_list, n) in question_list.answer_lists" :key="`answer${n}`">
@@ -94,6 +96,7 @@
 <script src="https://cdn.quilljs.com/1.3.4/quill.js"></script>
 <!-- Quill JS Vue -->
 <script src="https://cdn.jsdelivr.net/npm/vue-quill-editor@3.0.4/dist/vue-quill-editor.js"></script>
+<!-- <script src="/js/dist/vue-html5-editor.js"></script> -->
 
 <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -103,7 +106,8 @@
 
 
 <script>
-Vue.use(VueQuillEditor)
+Vue.use(VueQuillEditor);
+// Vue.use(VueHtml5Editor);
 new Vue({ 
     el: '#app',
     vuetify: new Vuetify(),
