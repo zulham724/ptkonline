@@ -231,15 +231,14 @@
                                 class="d-flex justify-end"
                                 v-if="build.educational_level_id"
                             >
-                             
                                 <v-btn
                                     class="mt-2"
                                     color="primary"
                                     @click="submit"
-                                    >
-                                     <v-icon left>
-                                    mdi-content-save
-                                </v-icon>
+                                >
+                                    <v-icon left>
+                                        mdi-content-save
+                                    </v-icon>
                                     Simpan Perubahan</v-btn
                                 >
                             </div>
@@ -393,9 +392,9 @@ export default {
                 if (result.isConfirmed) {
                     this.$store.commit("ClassroomResearchEdit/reset");
                     this.$inertia
-                        .put(
+                        .post(
                             "/classroom_researches/" + this.build.id,
-                            this.build,
+                            { _method: "PUT", ...this.build },
                             {
                                 replace: false,
                                 preserveState: true,
